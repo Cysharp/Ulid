@@ -200,7 +200,7 @@ namespace System // wa-o, System Namespace!?
 
         // Convert
 
-        public byte[] GetBytes()
+        public byte[] ToByteArray()
         {
             var bytes = new byte[16];
             Unsafe.WriteUnaligned(ref bytes[0], this);
