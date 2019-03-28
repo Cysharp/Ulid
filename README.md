@@ -59,6 +59,16 @@ from string(Base32) to ulid, `Ulid.Parse(string)` is fastest and zero allocation
 
 to string representation(Base32), `Ulid.ToString()` is fastest and less allocation.
 
+* NewId().ToString()
+
+| Method |     Mean | Error | Ratio | Gen 0/1k Op | Gen 1/1k Op | Gen 2/1k Op | Allocated Memory/Op |
+|------- |---------:|------:|------:|------------:|------------:|------------:|--------------------:|
+|  Guid_ | 205.7 ns |    NA |  1.00 |      0.0162 |           - |           - |               104 B |
+|  Ulid_ | 110.2 ns |    NA |  0.54 |      0.0125 |           - |           - |                80 B |
+| NUlid_ | 301.7 ns |    NA |  1.47 |      0.0744 |           - |           - |               472 B |
+
+case of get the string representation immediately, `Ulid` is twice faster than Guid.
+
 * GetHashCode
 
 | Method |       Mean | Error | Ratio | Gen 0/1k Op | Gen 1/1k Op | Gen 2/1k Op | Allocated Memory/Op |
