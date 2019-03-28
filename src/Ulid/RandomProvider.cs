@@ -60,7 +60,7 @@ namespace System
         }
     }
 
-    public class XorShift64
+    internal class XorShift64
     {
         UInt64 x = 88172645463325252UL;
 
