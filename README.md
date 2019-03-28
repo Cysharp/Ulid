@@ -17,13 +17,13 @@ Install-Package Ulid
 How to use
 ---
 TODO:
-`Ulid.NewUlid()`
-`Ulid.Parse()`
-`new Ulid()`
-`.ToString()`
-`.ToByteArray()`
-`.TryWriteBytes()`
-`.ToBase64()`
+* `Ulid.NewUlid()`
+* `Ulid.Parse()`
+* `new Ulid()`
+* `.ToString()`
+* `.ToByteArray()`
+* `.TryWriteBytes()`
+* `.ToBase64()`
 
 Performance
 ---
@@ -77,7 +77,7 @@ GetHashCode is called when use dictionary's key. `Ulid` is fast and zero allocat
 |  Ulid_ |  2.023 ns |    NA |  1.11 |           - |           - |           - |                   - |
 | NUlid_ | 29.875 ns |    NA | 16.43 |      0.0126 |           - |           - |                80 B |
 
-GetHashCode is called when use dictionary's key. `Ulid` is fast and zero allocation.
+Equals is called when use dictionary's key. `Ulid` is fast and zero allocation.
 
 * CompareTo
 
@@ -94,6 +94,7 @@ Integrate
 TODO: extension packages
 
 Direct serialization: for JSON.NET, Utf8Json, MessagePack-CSharp
+
 Direct mapping: for Dapper
 
 Author Info
