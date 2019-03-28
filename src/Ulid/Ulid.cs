@@ -160,7 +160,7 @@ namespace System // wa-o, System Namespace!?
         public static Ulid NewUlid(DateTimeOffset timestamp, ReadOnlySpan<byte> randomness)
         {
             if (randomness.Length != 10) throw new ArgumentException("invalid randomness length, length:" + randomness.Length);
-            return new Ulid(timestamp.ToUnixTimeMilliseconds(), RandomProvider.GetXorShift64());
+            return new Ulid(timestamp.ToUnixTimeMilliseconds(), randomness);
         }
 
         public static Ulid Parse(string base32)
