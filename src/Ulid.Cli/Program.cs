@@ -15,7 +15,7 @@ namespace Ulid.Cli
     public class UlidBatch : BatchBase
     {
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
-        [Command("new", "create new ULID")]
+        [Command("generate", "create ULID")]
         public void New([Option("b", "output as base64 format, or output base32 if false")]bool base64 = false,
             [Option("t", "timestamp(converted to UTC, ISO8601 format recommended)")]string timestamp = null,
             [Option("r", "randomness bytes(formatted as Base32, must be 16 characters, case insensitive)")]string randomness = null)
