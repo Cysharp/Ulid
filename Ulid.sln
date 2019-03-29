@@ -24,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".circleci", ".circleci", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ulid.Cli", "src\Ulid.Cli\Ulid.Cli.csproj", "{CD41A6E5-9F68-472E-9992-922F567BDB87}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ulid.Cli.Tests", "tests\Ulid.Cli.Tests\Ulid.Cli.Tests.csproj", "{3488CD90-AAEA-442A-8E2E-0639497E037F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{CD41A6E5-9F68-472E-9992-922F567BDB87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD41A6E5-9F68-472E-9992-922F567BDB87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD41A6E5-9F68-472E-9992-922F567BDB87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3488CD90-AAEA-442A-8E2E-0639497E037F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3488CD90-AAEA-442A-8E2E-0639497E037F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3488CD90-AAEA-442A-8E2E-0639497E037F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3488CD90-AAEA-442A-8E2E-0639497E037F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +66,7 @@ Global
 		{3E24E35E-05A1-4A29-8DA3-EC3E9A636D75} = {F1B5C8EA-DCBF-4A5F-819A-5E394F279AF9}
 		{7A21DCC2-C6C4-4E40-850F-281258856C4A} = {8AB8257F-2CB1-4F78-9980-8E5A0F017F84}
 		{CD41A6E5-9F68-472E-9992-922F567BDB87} = {A0803F51-FC43-4216-B067-41B516965BA0}
+		{3488CD90-AAEA-442A-8E2E-0639497E037F} = {8AB8257F-2CB1-4F78-9980-8E5A0F017F84}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E82BF37-8451-4819-BEF6-F9D9A2B48901}
