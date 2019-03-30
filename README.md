@@ -24,6 +24,8 @@ TODO:
 * `.ToByteArray()`
 * `.TryWriteBytes()`
 * `.ToBase64()`
+* `.Time`
+* `.Random`
 
 Performance
 ---
