@@ -132,6 +132,8 @@ argument list:
 -max, -maxRandomness: [default=False]max-randomness(use ZZZ...)
 ```
 
+This CLI tool is powered by [MicroBatchFramework](https://github.com/Cysharp/MicroBatchFramework/).
+
 Integrate
 ---
 TODO: extension packages
