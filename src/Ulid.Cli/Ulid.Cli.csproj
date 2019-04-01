@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ulid\Ulid.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MicroBatchFramework" Version="0.4.6-beta10" />
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Ulid.Cli.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <ToolCommandName>dotnet-ulid</ToolCommandName>
+    <PackAsTool>true</PackAsTool>
+    <Version>0.1.0</Version>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <!-- NuGet informations -->
+  <PropertyGroup>
+    <Authors>Cysharp</Authors>
+    <Copyright>Cysharp</Copyright>
+    <Description>ULID commandline utility</Description>
+    <PackageProjectUrl>https://github.com/Cysharp/Ulid</PackageProjectUrl>
+    <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>guid</PackageTags>
+  </PropertyGroup>
+
+</Project>
