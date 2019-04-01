@@ -125,9 +125,9 @@ AWmwNy2A/////////////w==
 
 ```
 argument list:
--b, -base64: [default=False]output as base64 format, or output base32 if false
 -t, -timestamp: [default=null]timestamp(converted to UTC, ISO8601 format recommended)
 -r, -randomness: [default=null]randomness bytes(formatted as Base32, must be 16 characters, case insensitive)
+-b, -base64: [default=False]output as base64 format, or output base32 if false
 -min, -minRandomness: [default=False]min-randomness(use 000...)
 -max, -maxRandomness: [default=False]max-randomness(use ZZZ...)
 ```
