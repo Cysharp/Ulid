@@ -101,6 +101,10 @@ Equals is called when use dictionary's key. `Ulid` is fast and zero allocation.
 
 CompareTo is called when use sort. `Ulid` is fastest and zero allocation.
 
+Cli
+---
+TODO:
+
 Integrate
 ---
 TODO: extension packages
