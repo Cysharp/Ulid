@@ -21,7 +21,7 @@
 
   <!-- NuGet informations -->
   <PropertyGroup>
-    <PackageId>ulid-cli</PackageId>
+    <PackageId>Ulid-Cli</PackageId>
     <PackageVersion>$(Version)</PackageVersion>
     <Authors>Cysharp</Authors>
     <Copyright>Cysharp</Copyright>
