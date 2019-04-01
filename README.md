@@ -110,7 +110,17 @@ You can install command-line to generate ulid string by  .NET Core Global Tool.
 after installed, you can call like here.
 
 ```
-$ ulid
+$ dotnet ulid
+01D7CB31YQKCJPY9FDTN2WTAFF
+
+$ dotnet ulid -t "2019/03/25" -min
+01D6R3EBC00000000000000000
+
+$ dotnet ulid -t "2019/03/25" -max
+01D6R3EBC0ZZZZZZZZZZZZZZZZ
+
+$ dotnet ulid -t "2019/03/25" -max -base64
+AWmwNy2A/////////////w==
 ```
 
 ```
