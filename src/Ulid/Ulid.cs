@@ -107,7 +107,7 @@ namespace System // wa-o, System Namespace!?
             this.timestamp3 = Unsafe.Add(ref fisrtByte, 2);
             this.timestamp4 = Unsafe.Add(ref fisrtByte, 1);
             this.timestamp5 = Unsafe.Add(ref fisrtByte, 0);
-            
+
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
             randomness1 = randomness[1];
@@ -312,6 +312,11 @@ namespace System // wa-o, System Namespace!?
 
                 return true;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Ulid other) ? this.Equals(other) : false;
         }
 
         public static bool operator ==(Ulid a, Ulid b)
