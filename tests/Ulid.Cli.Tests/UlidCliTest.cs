@@ -60,7 +60,7 @@ namespace Ulid.Cli.Tests
                 new KeyValuePair<string, byte[]>("ZZZZZZZZ", new byte[]{ 0xff, 0xff, 0xff, 0xff, 0xff }),
                 new KeyValuePair<string, byte[]>(new string('1', 8), new byte[]{ 0x08, 0x42, 0x10, 0x84, 0x21 })
             };
-            foreach(var pair in pairs)
+            foreach (var pair in pairs)
             {
                 var buf = new byte[5];
                 CliUtil.ConvertBase32ToBytes(pair.Key, buf, 0);
@@ -76,6 +76,32 @@ namespace Ulid.Cli.Tests
             var actual = new byte[b.Length];
             CliUtil.ConvertBase32ToBytes(b32, actual, 2);
             actual.Should().BeEquivalentTo(b);
+        }
+
+        [Fact]
+        public void Min()
+        {
+            using (TextWriterBridge.BeginSetConsoleOut(out var log))
+            {
+                new UlidBatch().New(timestamp: "2001/12/31", minRandomness: true);
+                System.Ulid.Parse(log[0]).Random.Should().BeEquivalentTo(new byte[]
+                {
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                });
+            }
+        }
+
+        [Fact]
+        public void Max()
+        {
+            using (TextWriterBridge.BeginSetConsoleOut(out var log))
+            {
+                new UlidBatch().New(timestamp: "2001/12/31", maxRandomness: true);
+                System.Ulid.Parse(log[0]).Random.Should().BeEquivalentTo(new byte[]
+                {
+                    255, 255, 255, 255, 255, 255, 255, 255, 255, 255
+                });
+            }
         }
     }
 }

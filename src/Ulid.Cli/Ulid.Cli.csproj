@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\Ulid\Ulid.csproj" />
@@ -16,12 +16,13 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <ToolCommandName>dotnet-ulid</ToolCommandName>
     <PackAsTool>true</PackAsTool>
-    <Version>0.1.0</Version>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <!-- NuGet informations -->
   <PropertyGroup>
+    <PackageId>Ulid-Cli</PackageId>
+    <PackageVersion>$(Version)</PackageVersion>
     <Authors>Cysharp</Authors>
     <Copyright>Cysharp</Copyright>
     <Description>ULID commandline utility</Description>

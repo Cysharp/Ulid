@@ -20,10 +20,15 @@ jobs:
       - run: dotnet build -c Release -p:Version=${CIRCLE_TAG}
       - run: dotnet test -c Release --no-build
       - run: dotnet pack ./src/Ulid/Ulid.csproj -c Release --no-build -p:Version=${CIRCLE_TAG}
+      - run: dotnet pack ./src/Ulid.Cli/Ulid.Cli.csproj -c Release --no-build -p:Version=${CIRCLE_TAG}
       - store_artifacts:
           path: ./src/Ulid/bin/Release
           destination: ./.Ulid/
       - run: dotnet nuget push ./src/Ulid/bin/Release/Ulid.${CIRCLE_TAG}.nupkg -s https://www.nuget.org/api/v2/package -k ${NUGET_KEY}
+      - store_artifacts:
+          path: ./src/Ulid.Cli/bin/Release
+          destination: ./.Ulid/
+      - run: dotnet nuget push ./src/Ulid.Cli/bin/Release/Ulid.Cli.${CIRCLE_TAG}.nupkg -s https://www.nuget.org/api/v2/package -k ${NUGET_KEY}
 workflows:
   version: 2
   build-and-push:

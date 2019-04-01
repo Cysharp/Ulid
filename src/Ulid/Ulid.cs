@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace System // wa-o, System Namespace!?
 {
@@ -11,7 +12,7 @@ namespace System // wa-o, System Namespace!?
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 16)]
     [DebuggerDisplay("{ToString(),nq}")]
-    public readonly struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
+    public struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
     {
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
@@ -46,6 +47,7 @@ namespace System // wa-o, System Namespace!?
         [FieldOffset(14)] readonly byte randomness8;
         [FieldOffset(15)] readonly byte randomness9;
 
+        [IgnoreDataMember]
         public byte[] Random => new byte[]
         {
             randomness0,
@@ -57,9 +59,10 @@ namespace System // wa-o, System Namespace!?
             randomness6,
             randomness7,
             randomness8,
-            randomness9
+            randomness9,
         };
 
+        [IgnoreDataMember]
         public DateTimeOffset Time
         {
             get
@@ -104,7 +107,7 @@ namespace System // wa-o, System Namespace!?
             this.timestamp3 = Unsafe.Add(ref fisrtByte, 2);
             this.timestamp4 = Unsafe.Add(ref fisrtByte, 1);
             this.timestamp5 = Unsafe.Add(ref fisrtByte, 0);
-
+            
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
             randomness1 = randomness[1];
@@ -309,6 +312,16 @@ namespace System // wa-o, System Namespace!?
 
                 return true;
             }
+        }
+
+        public static bool operator ==(Ulid a, Ulid b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(Ulid a, Ulid b)
+        {
+            return !a.Equals(b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
