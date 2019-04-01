@@ -110,7 +110,7 @@ You can install command-line to generate ulid string by  .NET Core Global Tool.
 after installed, you can call like here.
 
 ```
-$ dotnet 
+$ ulid
 ```
 
 ```
