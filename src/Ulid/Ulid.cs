@@ -339,7 +339,7 @@ namespace System // wa-o, System Namespace!?
             if (this.timestamp2 != other.timestamp2) return GetResult(this.timestamp2, other.timestamp2);
             if (this.timestamp3 != other.timestamp3) return GetResult(this.timestamp3, other.timestamp3);
             if (this.timestamp4 != other.timestamp4) return GetResult(this.timestamp4, other.timestamp4);
-            if (this.timestamp5 != other.timestamp4) return GetResult(this.timestamp5, other.timestamp5);
+            if (this.timestamp5 != other.timestamp5) return GetResult(this.timestamp5, other.timestamp5);
 
             if (this.randomness0 != other.randomness0) return GetResult(this.randomness0, other.randomness0);
             if (this.randomness1 != other.randomness1) return GetResult(this.randomness1, other.randomness1);
