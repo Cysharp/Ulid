@@ -16,7 +16,6 @@ Install-Package Ulid
 
 How to use
 ---
-TODO:
 * `Ulid.NewUlid()`
 * `Ulid.Parse()`
 * `new Ulid()`
