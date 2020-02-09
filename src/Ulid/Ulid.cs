@@ -149,7 +149,26 @@ namespace System // wa-o, System Namespace!?
         }
 
         // TODO: Is there a way to extract a GUID's internal value without allocation?
-        public Ulid(Guid guid) : this(guid.ToByteArray()) { }
+        public Ulid(Guid guid)
+        {
+            var byteArray = guid.ToByteArray();
+            this.timestamp0 = byteArray[3];
+            this.timestamp1 = byteArray[2];
+            this.timestamp2 = byteArray[1];
+            this.timestamp3 = byteArray[0];
+            this.timestamp4 = byteArray[5];
+            this.timestamp5 = byteArray[4];
+            this.randomness0 = byteArray[7];
+            this.randomness1 = byteArray[6];
+            this.randomness2 = byteArray[8];
+            this.randomness3 = byteArray[9];
+            this.randomness4 = byteArray[10];
+            this.randomness5 = byteArray[11];
+            this.randomness6 = byteArray[12];
+            this.randomness7 = byteArray[13];
+            this.randomness8 = byteArray[14];
+            this.randomness9 = byteArray[15];
+        }
 
         // Factory
 
@@ -364,26 +383,29 @@ namespace System // wa-o, System Namespace!?
         }
 
         /// <summary>
-        /// Convert this <c>Ulid</c> value to a <c>Guid</c> value with the same byte layout.
+        /// Convert this <c>Ulid</c> value to a <c>Guid</c> value with the same comparability.
         /// </summary>
+        /// <remarks>
+        /// The byte arrangement between Ulid and Guid is not preserved. The 
+        /// </remarks>
         /// <returns>The converted <c>Guid</c> value</returns>
         public Guid ToGuid()
         {
             int guid_0_4 =
-                this.timestamp0 << 0 |
-                this.timestamp1 << 8 |
-                this.timestamp2 << 16 |
-                this.timestamp3 << 24;
+                this.timestamp0 << 24 |
+                this.timestamp1 << 16 |
+                this.timestamp2 << 8 |
+                this.timestamp3 << 0;
 
             short guid_4_6 =
                 (short)(
-                    this.timestamp4 << 0 |
-                    this.timestamp5 << 8);
+                    this.timestamp4 << 8 |
+                    this.timestamp5 << 0);
 
             short guid_6_8 =
                 (short)(
-                    this.randomness0 << 0 |
-                    this.randomness1 << 8);
+                    this.randomness0 << 8 |
+                    this.randomness1 << 0);
 
             return new Guid(
                 guid_0_4,
