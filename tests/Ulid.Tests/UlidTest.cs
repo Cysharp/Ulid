@@ -67,5 +67,15 @@ namespace UlidTests
             first.ToString().Should().BeEquivalentTo(second.ToString());
             // Console.WriteLine($"first={first.ToString()}, second={second.ToString()}");
         }
+
+        [Fact]
+        public void GuidInterop()
+        {
+            var ulid = Ulid.NewUlid();
+            var guid = ulid.ToGuid();
+            var ulid2 = new Ulid(guid);
+
+            ulid2.Should().BeEquivalentTo(ulid, "a Ulid-Guid roundtrip should result in identical values");
+        }
     }
 }

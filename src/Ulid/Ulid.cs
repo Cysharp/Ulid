@@ -148,6 +148,9 @@ namespace System // wa-o, System Namespace!?
             randomness8 = (byte)((CharToBase32[base32[22]] << 7) | (CharToBase32[base32[23]] << 2) | (CharToBase32[base32[24]] >> 3));
         }
 
+        // TODO: Is there a way to extract a GUID's internal value without allocation?
+        public Ulid(Guid guid) : this(guid.ToByteArray()) { }
+
         // Factory
 
         public static Ulid NewUlid()
@@ -353,6 +356,47 @@ namespace System // wa-o, System Namespace!?
             if (this.randomness9 != other.randomness9) return GetResult(this.randomness9, other.randomness9);
 
             return 0;
+        }
+
+        public static explicit operator Guid(Ulid _this)
+        {
+            return _this.ToGuid();
+        }
+
+        /// <summary>
+        /// Convert this <c>Ulid</c> value to a <c>Guid</c> value with the same byte layout.
+        /// </summary>
+        /// <returns>The converted <c>Guid</c> value</returns>
+        public Guid ToGuid()
+        {
+            int guid_0_4 =
+                this.timestamp0 << 0 |
+                this.timestamp1 << 8 |
+                this.timestamp2 << 16 |
+                this.timestamp3 << 24;
+
+            short guid_4_6 =
+                (short)(
+                    this.timestamp4 << 0 |
+                    this.timestamp5 << 8);
+
+            short guid_6_8 =
+                (short)(
+                    this.randomness0 << 0 |
+                    this.randomness1 << 8);
+
+            return new Guid(
+                guid_0_4,
+                guid_4_6,
+                guid_6_8,
+                this.randomness2,
+                this.randomness3,
+                this.randomness4,
+                this.randomness5,
+                this.randomness6,
+                this.randomness7,
+                this.randomness8,
+                this.randomness9);
         }
     }
 }
