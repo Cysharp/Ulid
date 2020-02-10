@@ -382,7 +382,7 @@ namespace System // wa-o, System Namespace!?
         /// Convert this <c>Ulid</c> value to a <c>Guid</c> value with the same comparability.
         /// </summary>
         /// <remarks>
-        /// The byte arrangement between Ulid and Guid is not preserved. The 
+        /// The byte arrangement between Ulid and Guid is not preserved.
         /// </remarks>
         /// <returns>The converted <c>Guid</c> value</returns>
         public Guid ToGuid()
