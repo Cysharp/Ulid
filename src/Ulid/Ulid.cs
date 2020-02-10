@@ -148,26 +148,22 @@ namespace System // wa-o, System Namespace!?
             randomness8 = (byte)((CharToBase32[base32[22]] << 7) | (CharToBase32[base32[23]] << 2) | (CharToBase32[base32[24]] >> 3));
         }
 
-        // TODO: Is there a way to extract a GUID's internal value without allocation?
+        // HACK: We assume the layout of a Guid is the following:
+        // Int32, Int16, Int16, Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8
+        // source: https://github.com/dotnet/runtime/blob/4f9ae42d861fcb4be2fcd5d3d55d5f227d30e723/src/libraries/System.Private.CoreLib/src/System/Guid.cs
         public Ulid(Guid guid)
         {
-            var byteArray = guid.ToByteArray();
-            this.timestamp0 = byteArray[3];
-            this.timestamp1 = byteArray[2];
-            this.timestamp2 = byteArray[1];
-            this.timestamp3 = byteArray[0];
-            this.timestamp4 = byteArray[5];
-            this.timestamp5 = byteArray[4];
-            this.randomness0 = byteArray[7];
-            this.randomness1 = byteArray[6];
-            this.randomness2 = byteArray[8];
-            this.randomness3 = byteArray[9];
-            this.randomness4 = byteArray[10];
-            this.randomness5 = byteArray[11];
-            this.randomness6 = byteArray[12];
-            this.randomness7 = byteArray[13];
-            this.randomness8 = byteArray[14];
-            this.randomness9 = byteArray[15];
+            Span<byte> buf = stackalloc byte[16];
+            MemoryMarshal.Write(buf, ref guid);
+            if (BitConverter.IsLittleEndian)
+            {
+                byte tmp;
+                tmp = buf[0]; buf[0] = buf[3]; buf[3] = tmp;
+                tmp = buf[1]; buf[1] = buf[2]; buf[2] = tmp;
+                tmp = buf[4]; buf[4] = buf[5]; buf[5] = tmp;
+                tmp = buf[6]; buf[6] = buf[7]; buf[7] = tmp;
+            }
+            this = MemoryMarshal.Read<Ulid>(buf);
         }
 
         // Factory
@@ -391,34 +387,17 @@ namespace System // wa-o, System Namespace!?
         /// <returns>The converted <c>Guid</c> value</returns>
         public Guid ToGuid()
         {
-            int guid_0_4 =
-                this.timestamp0 << 24 |
-                this.timestamp1 << 16 |
-                this.timestamp2 << 8 |
-                this.timestamp3 << 0;
-
-            short guid_4_6 =
-                (short)(
-                    this.timestamp4 << 8 |
-                    this.timestamp5 << 0);
-
-            short guid_6_8 =
-                (short)(
-                    this.randomness0 << 8 |
-                    this.randomness1 << 0);
-
-            return new Guid(
-                guid_0_4,
-                guid_4_6,
-                guid_6_8,
-                this.randomness2,
-                this.randomness3,
-                this.randomness4,
-                this.randomness5,
-                this.randomness6,
-                this.randomness7,
-                this.randomness8,
-                this.randomness9);
+            Span<byte> buf = stackalloc byte[16];
+            MemoryMarshal.Write(buf, ref this);
+            if (BitConverter.IsLittleEndian)
+            {
+                byte tmp;
+                tmp = buf[0]; buf[0] = buf[3]; buf[3] = tmp;
+                tmp = buf[1]; buf[1] = buf[2]; buf[2] = tmp;
+                tmp = buf[4]; buf[4] = buf[5]; buf[5] = tmp;
+                tmp = buf[6]; buf[6] = buf[7]; buf[7] = tmp;
+            }
+            return MemoryMarshal.Read<Guid>(buf);
         }
     }
 }
