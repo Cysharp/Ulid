@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.2;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.2;netcoreapp3.0</TargetFrameworks>
 
     <IsPackable>false</IsPackable>
 
@@ -21,9 +21,9 @@
   </ItemGroup>
 
   <!-- Support System.Text.Json when target supports -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
   </ItemGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <DefineConstants>SystemTextJson</DefineConstants>
   </PropertyGroup>
 </Project>
