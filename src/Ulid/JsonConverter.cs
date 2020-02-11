@@ -89,6 +89,7 @@ namespace System
                     if (reader.TokenType != JsonTokenType.String)
                         throw new JsonException("Expected string");
 
+                    Span<byte> result = stackalloc byte[16];
                     if (reader.HasValueSequence)
                     {
                         // Parse using ValueSequence
@@ -97,7 +98,6 @@ namespace System
                             throw new JsonException("Ulid invalid: length must be 26");
                         Span<byte> buf = stackalloc byte[26];
                         seq.CopyTo(buf);
-                        Span<byte> result = stackalloc byte[16];
                         ParseSpan(buf, result);
                         return MemoryMarshal.Read<Ulid>(result);
                     }
@@ -107,10 +107,9 @@ namespace System
                         var buf = reader.ValueSpan;
                         if (buf.Length != 26)
                             throw new JsonException("Ulid invalid: length must be 26");
-                        Span<byte> result = stackalloc byte[16];
                         ParseSpan(buf, result);
-                        return MemoryMarshal.Read<Ulid>(result);
                     }
+                    return MemoryMarshal.Read<Ulid>(result);
                 }
                 catch (IndexOutOfRangeException e)
                 {
