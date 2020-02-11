@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace System._Ulid
+namespace System
 {
     public class UlidJsonConverter : JsonConverter<Ulid>
     {
@@ -20,6 +20,10 @@ namespace System._Ulid
                 return Ulid.Parse(reader.GetString());
             }
             catch (ArgumentException e)
+            {
+                throw new JsonException("Ulid invalid: length must be 26", e);
+            }
+            catch (IndexOutOfRangeException e)
             {
                 throw new JsonException("Ulid invalid: length must be 26", e);
             }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFrameworks>netcoreapp2.2;netcoreapp3.1</TargetFrameworks>
 
     <IsPackable>false</IsPackable>
 
@@ -20,4 +20,10 @@
     <ProjectReference Include="..\..\src\Ulid\Ulid.csproj" />
   </ItemGroup>
 
+  <!-- Support System.Text.Json when target supports -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <DefineConstants>SystemTextJson</DefineConstants>
+  </PropertyGroup>
 </Project>

@@ -3,11 +3,10 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-
 #if SystemTextJson
 using System.Text.Json.Serialization;
-
 #endif
+
 namespace System // wa-o, System Namespace!?
 {
     /// <summary>
@@ -17,7 +16,7 @@ namespace System // wa-o, System Namespace!?
     [StructLayout(LayoutKind.Explicit, Size = 16)]
     [DebuggerDisplay("{ToString(),nq}")]
 #if SystemTextJson
-    [JsonConverter(typeof(System._Ulid.UlidJsonConverter))]
+    [JsonConverter(typeof(UlidJsonConverter))]
 #endif
     public struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
     {
