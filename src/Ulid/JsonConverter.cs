@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace System
 {
+public partial struct Ulid{
     public class UlidJsonConverter : JsonConverter<Ulid>
     {
         /// <summary>
@@ -39,5 +40,5 @@ namespace System
             writer.WriteStringValue(toString);
         }
     }
-}
+}}
 #endif

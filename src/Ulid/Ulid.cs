@@ -18,7 +18,7 @@ namespace System // wa-o, System Namespace!?
 #if SystemTextJson
     [JsonConverter(typeof(UlidJsonConverter))]
 #endif
-    public struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
+    public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
     {
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
