@@ -2,11 +2,11 @@ Ulid
 ===
 [![CircleCI](https://circleci.com/gh/Cysharp/Ulid.svg?style=svg)](https://circleci.com/gh/Cysharp/Ulid)
 
-Fast .NET Standard(C#) Implementation of [ULID](https://github.com/ulid/spec). Ulid is sortable, random id generator. This project aims performance by fastest binary serializer([MessagePack-CSharp](https://github.com/neuecc/MessagePack-CSharp/)) technology. It achives faster generate than Guid.NewGuid.
+Fast C# Implementation of [ULID](https://github.com/ulid/spec) for .NET Core and Unity. Ulid is sortable, random id generator. This project aims performance by fastest binary serializer([MessagePack-CSharp](https://github.com/neuecc/MessagePack-CSharp/)) technology. It achives faster generate than Guid.NewGuid.
 
 ![image](https://user-images.githubusercontent.com/46207/55129636-266c0d00-515b-11e9-85ab-3437de539451.png)
 
-NuGet: [Ulid](https://www.nuget.org/packages/Ulid)
+NuGet: [Ulid](https://www.nuget.org/packages/Ulid) or download .unitypackage from [Ulid/Releases](https://github.com/Cysharp/Ulid/releases) page.
 
 ```
 Install-Package Ulid
@@ -14,6 +14,8 @@ Install-Package Ulid
 
 How to use
 ---
+Similar api to Guid.
+
 * `Ulid.NewUlid()`
 * `Ulid.Parse()`
 * `Ulid.TryParse()`
@@ -139,20 +141,38 @@ Integrate
 
 NuGet: [Ulid.SystemTextJson](https://www.nuget.org/packages/Ulid.SystemTextJson)
 
+You can use custom Ulid converter - `Cysharp.Serialization.Json.UlidJsonConverter`.
 
+```csharp
+var options = new JsonSerializerOptions()
+{
+    Converters =
+    {
+        new Cysharp.Serialization.Json.UlidJsonConverter()
+    }
+};
 
+JsonSerializer.Serialize(Ulid.NewUlid(), options);
+```
+
+If application targetframework is `netcoreapp3.0`, converter is builtin, does not require to add `Ulid.SystemTextJson` package, and does not require use custom options.
 
 **MessagePack-CSharp**
 
 NuGet: [Ulid.MessagePack](https://www.nuget.org/packages/Ulid.MessagePack)
 
+You can use custom Ulid formatter - `Cysharp.Serialization.MessagePack.UlidMessagePackFormatter` and resolver - `Cysharp.Serialization.MessagePack.UlidMessagePackResolver`.
 
-Author Info
----
-This library is mainly developed by Yoshifumi Kawai(a.k.a. neuecc).  
-He is the CEO/CTO of Cysharp which is a subsidiary of [Cygames](https://www.cygames.co.jp/en/).  
-He is awarding Microsoft MVP for Developer Technologies(C#) since 2011.  
-He is known as the creator of [UniRx](https://github.com/neuecc/UniRx/) and [MessagePack for C#](https://github.com/neuecc/MessagePack-CSharp/).
+```csharp
+var resolver = MessagePack.Resolvers.CompositeResolver.Create(
+    Cysharp.Serialization.MessagePack.UlidMessagePackResolver.Instance,
+    MessagePack.Resolvers.StandardResolver.Instance);
+var options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
+
+MessagePackSerializer.Serialize(Ulid.NewUlid(), options);
+```
+
+If you want to use this custom formatter on Unity, download [UlidMessagePackFormatter.cs](https://github.com/Cysharp/Ulid/blob/master/src/Ulid.MessagePack/UlidMessagePackFormatter.cs).
 
 License
 ---
