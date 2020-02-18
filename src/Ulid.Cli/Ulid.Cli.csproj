@@ -1,43 +1,43 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Ulid\Ulid.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Ulid\Ulid.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Ulid.Cli.Tests</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>Ulid.Cli.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <ToolCommandName>dotnet-ulid</ToolCommandName>
-    <PackAsTool>true</PackAsTool>
-    <LangVersion>7.3</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <ToolCommandName>dotnet-ulid</ToolCommandName>
+        <PackAsTool>true</PackAsTool>
+        <LangVersion>7.3</LangVersion>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\Ulid\Icon.png" Pack="true" PackagePath="/" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="..\Ulid\Icon.png" Pack="true" PackagePath="/" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="ConsoleAppFramework" Version="2.1.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="ConsoleAppFramework" Version="2.1.0" />
+    </ItemGroup>
 
-  <!-- NuGet informations -->
-  <PropertyGroup>
-    <PackageId>Ulid-Cli</PackageId>
-    <PackageVersion>$(Version)</PackageVersion>
-    <Authors>Cysharp</Authors>
-    <Copyright>Cysharp</Copyright>
-    <Description>ULID commandline utility</Description>
-    <PackageProjectUrl>https://github.com/Cysharp/Ulid</PackageProjectUrl>
-    <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>guid</PackageTags>
-    <PackageIcon>Icon.png</PackageIcon>
-  </PropertyGroup>
+    <!-- NuGet informations -->
+    <PropertyGroup>
+        <PackageId>Ulid-Cli</PackageId>
+        <PackageVersion>$(Version)</PackageVersion>
+        <Authors>Cysharp</Authors>
+        <Copyright>Cysharp</Copyright>
+        <Description>ULID commandline utility</Description>
+        <PackageProjectUrl>https://github.com/Cysharp/Ulid</PackageProjectUrl>
+        <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>guid</PackageTags>
+        <PackageIcon>Icon.png</PackageIcon>
+    </PropertyGroup>
 
 </Project>

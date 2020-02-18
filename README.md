@@ -6,8 +6,6 @@ Fast .NET Standard(C#) Implementation of [ULID](https://github.com/ulid/spec). U
 
 ![image](https://user-images.githubusercontent.com/46207/55129636-266c0d00-515b-11e9-85ab-3437de539451.png)
 
-Documantation is not yet but core library is completed.
-
 NuGet: [Ulid](https://www.nuget.org/packages/Ulid)
 
 ```

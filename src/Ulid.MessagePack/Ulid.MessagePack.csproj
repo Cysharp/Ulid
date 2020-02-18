@@ -19,4 +19,8 @@
         <ProjectReference Include="..\Ulid\Ulid.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Include="..\Ulid\Icon.png" Pack="true" PackagePath="/" />
+    </ItemGroup>
+
 </Project>

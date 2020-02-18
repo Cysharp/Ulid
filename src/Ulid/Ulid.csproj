@@ -21,4 +21,15 @@
     <ItemGroup>
         <None Include="Icon.png" Pack="true" PackagePath="/" />
     </ItemGroup>
+
+    <!-- Copy files for Unity -->
+    <PropertyGroup>
+        <DestinationRoot>$(MSBuildProjectDirectory)\..\Ulid.Unity\Assets\Scripts\Ulid\</DestinationRoot>
+    </PropertyGroup>
+    <ItemGroup>
+        <TargetFiles1 Include="$(MSBuildProjectDirectory)\**\*.cs" Exclude="**\bin\**\*.*;**\obj\**\*.*;UlidJsonConverter.cs" />
+    </ItemGroup>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Copy SourceFiles="@(TargetFiles1)" DestinationFiles="$(DestinationRoot)\%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
+    </Target>
 </Project>
