@@ -3,9 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-#if SystemTextJson
-using System.Text.Json.Serialization;
-#endif
+using System.Text;
 
 namespace System // wa-o, System Namespace!?
 {
@@ -15,13 +13,14 @@ namespace System // wa-o, System Namespace!?
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 16)]
     [DebuggerDisplay("{ToString(),nq}")]
-#if SystemTextJson
-    [JsonConverter(typeof(UlidJsonConverter))]
+#if NETCOREAPP3_0
+    [System.Text.Json.Serialization.JsonConverter(typeof(Cysharp.Serialization.Json.UlidJsonConverter))]
 #endif
     public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
     {
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
+        static readonly byte[] Base32Bytes = Encoding.UTF8.GetBytes(Base32Text);
         static readonly byte[] CharToBase32 = new byte[] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31 };
         static readonly DateTimeOffset UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -71,7 +70,8 @@ namespace System // wa-o, System Namespace!?
         [IgnoreDataMember]
         public DateTimeOffset Time
         {
-            get {
+            get
+            {
                 Span<byte> buffer = stackalloc byte[8];
                 buffer[0] = timestamp5;
                 buffer[1] = timestamp4;
@@ -200,6 +200,12 @@ namespace System // wa-o, System Namespace!?
             return new Ulid(base32);
         }
 
+        public static Ulid Parse(ReadOnlySpan<byte> base32)
+        {
+            if (!TryParse(base32, out var ulid)) throw new ArgumentException("invalid base32 length, length:" + base32.Length);
+            return ulid;
+        }
+
         public static bool TryParse(string base32, out Ulid ulid)
         {
             return TryParse(base32.AsSpan(), out ulid);
@@ -223,6 +229,54 @@ namespace System // wa-o, System Namespace!?
                 ulid = default(Ulid);
                 return false;
             }
+        }
+
+        public static bool TryParse(ReadOnlySpan<byte> base32, out Ulid ulid)
+        {
+            if (base32.Length != 26)
+            {
+                ulid = default(Ulid);
+                return false;
+            }
+
+            try
+            {
+                ulid = ParseCore(base32);
+                return true;
+            }
+            catch
+            {
+                ulid = default(Ulid);
+                return false;
+            }
+        }
+
+        static Ulid ParseCore(ReadOnlySpan<byte> base32)
+        {
+            if (base32.Length != 26) throw new ArgumentException("invalid base32 length, length:" + base32.Length);
+
+            var ulid = default(Ulid);
+
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 15) = (byte)((CharToBase32[base32[24]] << 5) | CharToBase32[base32[25]]);
+
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 0) = (byte)((CharToBase32[base32[0]] << 5) | CharToBase32[base32[1]]);
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 1) = (byte)((CharToBase32[base32[2]] << 3) | (CharToBase32[base32[3]] >> 2));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 2) = (byte)((CharToBase32[base32[3]] << 6) | (CharToBase32[base32[4]] << 1) | (CharToBase32[base32[5]] >> 4));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 3) = (byte)((CharToBase32[base32[5]] << 4) | (CharToBase32[base32[6]] >> 1));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 4) = (byte)((CharToBase32[base32[6]] << 7) | (CharToBase32[base32[7]] << 2) | (CharToBase32[base32[8]] >> 3));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 5) = (byte)((CharToBase32[base32[8]] << 5) | CharToBase32[base32[9]]);
+
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 6) = (byte)((CharToBase32[base32[10]] << 3) | (CharToBase32[base32[11]] >> 2));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 7) = (byte)((CharToBase32[base32[11]] << 6) | (CharToBase32[base32[12]] << 1) | (CharToBase32[base32[13]] >> 4));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 8) = (byte)((CharToBase32[base32[13]] << 4) | (CharToBase32[base32[14]] >> 1));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 9) = (byte)((CharToBase32[base32[14]] << 7) | (CharToBase32[base32[15]] << 2) | (CharToBase32[base32[16]] >> 3));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 10) = (byte)((CharToBase32[base32[16]] << 5) | CharToBase32[base32[17]]);
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 11) = (byte)((CharToBase32[base32[18]] << 3) | CharToBase32[base32[19]] >> 2);
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 12) = (byte)((CharToBase32[base32[19]] << 6) | (CharToBase32[base32[20]] << 1) | (CharToBase32[base32[21]] >> 4));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 13) = (byte)((CharToBase32[base32[21]] << 4) | (CharToBase32[base32[22]] >> 1));
+            Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref ulid), 14) = (byte)((CharToBase32[base32[22]] << 7) | (CharToBase32[base32[23]] << 2) | (CharToBase32[base32[24]] >> 3));
+
+            return ulid;
         }
 
         // Convert
@@ -259,11 +313,47 @@ namespace System // wa-o, System Namespace!?
             }
         }
 
-        public override string ToString()
+        public bool TryWriteStringify(Span<byte> span)
         {
-            // unroll-code is based on NUlid.
+            if (span.Length < 26) return false;
 
-            Span<char> span = stackalloc char[26];
+            span[25] = Base32Bytes[randomness9 & 31]; // eliminate bounds-check of span
+
+            // timestamp
+            span[0] = Base32Bytes[(timestamp0 & 224) >> 5];
+            span[1] = Base32Bytes[timestamp0 & 31];
+            span[2] = Base32Bytes[(timestamp1 & 248) >> 3];
+            span[3] = Base32Bytes[((timestamp1 & 7) << 2) | ((timestamp2 & 192) >> 6)];
+            span[4] = Base32Bytes[(timestamp2 & 62) >> 1];
+            span[5] = Base32Bytes[((timestamp2 & 1) << 4) | ((timestamp3 & 240) >> 4)];
+            span[6] = Base32Bytes[((timestamp3 & 15) << 1) | ((timestamp4 & 128) >> 7)];
+            span[7] = Base32Bytes[(timestamp4 & 124) >> 2];
+            span[8] = Base32Bytes[((timestamp4 & 3) << 3) | ((timestamp5 & 224) >> 5)];
+            span[9] = Base32Bytes[timestamp5 & 31];
+
+            // randomness
+            span[10] = Base32Bytes[(randomness0 & 248) >> 3];
+            span[11] = Base32Bytes[((randomness0 & 7) << 2) | ((randomness1 & 192) >> 6)];
+            span[12] = Base32Bytes[(randomness1 & 62) >> 1];
+            span[13] = Base32Bytes[((randomness1 & 1) << 4) | ((randomness2 & 240) >> 4)];
+            span[14] = Base32Bytes[((randomness2 & 15) << 1) | ((randomness3 & 128) >> 7)];
+            span[15] = Base32Bytes[(randomness3 & 124) >> 2];
+            span[16] = Base32Bytes[((randomness3 & 3) << 3) | ((randomness4 & 224) >> 5)];
+            span[17] = Base32Bytes[randomness4 & 31];
+            span[18] = Base32Bytes[(randomness5 & 248) >> 3];
+            span[19] = Base32Bytes[((randomness5 & 7) << 2) | ((randomness6 & 192) >> 6)];
+            span[20] = Base32Bytes[(randomness6 & 62) >> 1];
+            span[21] = Base32Bytes[((randomness6 & 1) << 4) | ((randomness7 & 240) >> 4)];
+            span[22] = Base32Bytes[((randomness7 & 15) << 1) | ((randomness8 & 128) >> 7)];
+            span[23] = Base32Bytes[(randomness8 & 124) >> 2];
+            span[24] = Base32Bytes[((randomness8 & 3) << 3) | ((randomness9 & 224) >> 5)];
+
+            return true;
+        }
+
+        public bool TryWriteStringify(Span<char> span)
+        {
+            if (span.Length < 26) return false;
 
             span[25] = Base32Text[randomness9 & 31]; // eliminate bounds-check of span
 
@@ -296,7 +386,13 @@ namespace System // wa-o, System Namespace!?
             span[23] = Base32Text[(randomness8 & 124) >> 2];
             span[24] = Base32Text[((randomness8 & 3) << 3) | ((randomness9 & 224) >> 5)];
 
-            // .NET Core 2.1 can use String.Create(SpanAction) but .NET Standard can't.
+            return true;
+        }
+
+        public override string ToString()
+        {
+            Span<char> span = stackalloc char[26];
+            TryWriteStringify(span);
             unsafe
             {
                 return new string((char*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)), 0, 26);

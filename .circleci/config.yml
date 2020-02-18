@@ -17,10 +17,10 @@ jobs:
     executor: dotnet
     steps:
       - checkout
-      - run: dotnet build -c Release -f netstandard2.0 -p:Version=${CIRCLE_TAG}
-      - run: dotnet test -c Release -f netstandard2.0 --no-build
-      - run: dotnet pack ./src/Ulid/Ulid.csproj -c Release -f netstandard2.0 --no-build -p:Version=${CIRCLE_TAG}
-      - run: dotnet pack ./src/Ulid.Cli/Ulid.Cli.csproj -c Release -f netstandard2.0 --no-build -p:Version=${CIRCLE_TAG}
+      - run: dotnet build -c Release -p:Version=${CIRCLE_TAG}
+      - run: dotnet test -c Release --no-build
+      - run: dotnet pack ./src/Ulid/Ulid.csproj -c Release --no-build -p:Version=${CIRCLE_TAG}
+      - run: dotnet pack ./src/Ulid.Cli/Ulid.Cli.csproj -c Release --no-build -p:Version=${CIRCLE_TAG}
       - store_artifacts:
           path: ./src/Ulid/bin/Release
           destination: ./.Ulid/

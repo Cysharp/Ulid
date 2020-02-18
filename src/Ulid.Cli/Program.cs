@@ -1,6 +1,6 @@
-﻿using System;
-using MicroBatchFramework;
+﻿using ConsoleAppFramework;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Threading.Tasks;
 
 namespace Ulid.Cli
@@ -9,10 +9,13 @@ namespace Ulid.Cli
     {
         static async Task Main(string[] args)
         {
-            await new HostBuilder().RunBatchEngineAsync<UlidBatch>(args).ConfigureAwait(false);
+            await Host.CreateDefaultBuilder()
+                .ConfigureLogging(x => x.ReplaceToSimpleConsole())
+                .RunConsoleAppFrameworkAsync<UlidBatch>(args)
+                .ConfigureAwait(false);
         }
     }
-    public class UlidBatch : BatchBase
+    public class UlidBatch : ConsoleAppBase
     {
         public void New(
             [Option("t", "timestamp(converted to UTC, ISO8601 format recommended)")]string timestamp = null,

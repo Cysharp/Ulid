@@ -18,10 +18,12 @@ How to use
 ---
 * `Ulid.NewUlid()`
 * `Ulid.Parse()`
+* `Ulid.TryParse()`
 * `new Ulid()`
 * `.ToString()`
 * `.ToByteArray()`
 * `.TryWriteBytes()`
+* `.TryWriteStringify()`
 * `.ToBase64()`
 * `.Time`
 * `.Random`
@@ -131,15 +133,21 @@ argument list:
 -max, -maxRandomness: [default=False]max-randomness(use ZZZ...)
 ```
 
-This CLI tool is powered by [MicroBatchFramework](https://github.com/Cysharp/MicroBatchFramework/).
+This CLI tool is powered by [ConsoleAppFramework](https://github.com/Cysharp/ConsoleAppFramework/).
 
 Integrate
 ---
-TODO: extension packages
+**System.Text.Json**
 
-Direct serialization: for JSON.NET, Utf8Json, MessagePack-CSharp
+NuGet: [Ulid.SystemTextJson](https://www.nuget.org/packages/Ulid.SystemTextJson)
 
-Direct mapping: for Dapper
+
+
+
+**MessagePack-CSharp**
+
+NuGet: [Ulid.MessagePack](https://www.nuget.org/packages/Ulid.MessagePack)
+
 
 Author Info
 ---

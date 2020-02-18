@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <DefineConstants>SYSTEM_TEXT_JSON</DefineConstants>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>release.snk</AssemblyOriginatorKeyFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- NuGet -->
+        <PackageId>Ulid.SystemTextJson</PackageId>
+        <Description>Ulid System.Text.Json Converter.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Include="..\Ulid\UlidJsonConverter.cs" Link="UlidJsonConverter.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Text.Json" Version="4.7.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Ulid\Ulid.csproj" />
+    </ItemGroup>
+
+</Project>

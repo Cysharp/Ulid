@@ -1,0 +1,19 @@
+﻿<Project>
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <LangVersion>7.3</LangVersion>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- NuGet Packaging -->
+    <PackageVersion>$(Version)</PackageVersion>
+    <Company>Cysharp</Company>
+    <Authors>Cysharp</Authors>
+    <Copyright>© Cysharp, Inc.</Copyright>
+    <PackageProjectUrl>https://github.com/Cysharp/Ulid</PackageProjectUrl>
+    <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>guid</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+  </PropertyGroup>
+</Project>

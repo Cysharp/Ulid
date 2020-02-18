@@ -1,5 +1,4 @@
-﻿#if SystemTextJson
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
@@ -16,13 +15,24 @@ namespace UlidTests
             public Ulid value { get; set; }
         }
 
+        JsonSerializerOptions GetOptions()
+        {
+            return new JsonSerializerOptions()
+            {
+                Converters =
+                {
+                    new Cysharp.Serialization.Json.UlidJsonConverter()
+                }
+            };
+        }
+
         [Fact]
         public void DeserializeTest()
         {
             var target = Ulid.NewUlid();
             var src = $"{{\"value\": \"{target.ToString()}\"}}";
 
-            var parsed = JsonSerializer.Deserialize<TestSerializationClass>(src);
+            var parsed = JsonSerializer.Deserialize<TestSerializationClass>(src, GetOptions());
             parsed.value.Should().BeEquivalentTo(target, "JSON deserialization should parse string as Ulid");
         }
 
@@ -33,7 +43,7 @@ namespace UlidTests
             var src = $"{{\"value\": \"{target.ToString().Substring(1)}\"}}";
             try
             {
-                var parsed = JsonSerializer.Deserialize<TestSerializationClass>(src);
+                var parsed = JsonSerializer.Deserialize<TestSerializationClass>(src, GetOptions());
                 throw new Exception("Test should fail here: no exception were thrown");
             }
             catch (JsonException)
@@ -55,10 +65,22 @@ namespace UlidTests
                 value = Ulid.NewUlid()
             };
 
+            var serialized = JsonSerializer.Serialize(groundTruth, GetOptions());
+            var deserialized = JsonSerializer.Deserialize<TestSerializationClass>(serialized, GetOptions());
+            deserialized.value.Should().BeEquivalentTo(groundTruth.value, "JSON serialize roundtrip");
+        }
+
+        [Fact]
+        public void WithtoutOptionsTest()
+        {
+            var groundTruth = new TestSerializationClass()
+            {
+                value = Ulid.NewUlid()
+            };
+
             var serialized = JsonSerializer.Serialize(groundTruth);
             var deserialized = JsonSerializer.Deserialize<TestSerializationClass>(serialized);
             deserialized.value.Should().BeEquivalentTo(groundTruth.value, "JSON serialize roundtrip");
         }
     }
 }
-#endif

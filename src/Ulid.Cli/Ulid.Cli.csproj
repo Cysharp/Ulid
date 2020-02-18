@@ -5,7 +5,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MicroBatchFramework" Version="0.4.6-beta10" />
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>Ulid.Cli.Tests</_Parameter1>
     </AssemblyAttribute>
@@ -21,6 +20,10 @@
 
   <ItemGroup>
     <None Include="..\Ulid\Icon.png" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ConsoleAppFramework" Version="2.1.0" />
   </ItemGroup>
 
   <!-- NuGet informations -->
