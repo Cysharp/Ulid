@@ -20,6 +20,7 @@
     <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>guid</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -42,4 +43,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <DefineConstants>SystemTextJson</DefineConstants>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="/" />
+  </ItemGroup>
 </Project>

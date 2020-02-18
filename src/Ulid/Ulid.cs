@@ -153,6 +153,24 @@ namespace System // wa-o, System Namespace!?
             randomness8 = (byte)((CharToBase32[base32[22]] << 7) | (CharToBase32[base32[23]] << 2) | (CharToBase32[base32[24]] >> 3));
         }
 
+        // HACK: We assume the layout of a Guid is the following:
+        // Int32, Int16, Int16, Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8
+        // source: https://github.com/dotnet/runtime/blob/4f9ae42d861fcb4be2fcd5d3d55d5f227d30e723/src/libraries/System.Private.CoreLib/src/System/Guid.cs
+        public Ulid(Guid guid)
+        {
+            Span<byte> buf = stackalloc byte[16];
+            MemoryMarshal.Write(buf, ref guid);
+            if (BitConverter.IsLittleEndian)
+            {
+                byte tmp;
+                tmp = buf[0]; buf[0] = buf[3]; buf[3] = tmp;
+                tmp = buf[1]; buf[1] = buf[2]; buf[2] = tmp;
+                tmp = buf[4]; buf[4] = buf[5]; buf[5] = tmp;
+                tmp = buf[6]; buf[6] = buf[7]; buf[7] = tmp;
+            }
+            this = MemoryMarshal.Read<Ulid>(buf);
+        }
+
         // Factory
 
         public static Ulid NewUlid()
@@ -358,6 +376,33 @@ namespace System // wa-o, System Namespace!?
             if (this.randomness9 != other.randomness9) return GetResult(this.randomness9, other.randomness9);
 
             return 0;
+        }
+
+        public static explicit operator Guid(Ulid _this)
+        {
+            return _this.ToGuid();
+        }
+
+        /// <summary>
+        /// Convert this <c>Ulid</c> value to a <c>Guid</c> value with the same comparability.
+        /// </summary>
+        /// <remarks>
+        /// The byte arrangement between Ulid and Guid is not preserved.
+        /// </remarks>
+        /// <returns>The converted <c>Guid</c> value</returns>
+        public Guid ToGuid()
+        {
+            Span<byte> buf = stackalloc byte[16];
+            MemoryMarshal.Write(buf, ref this);
+            if (BitConverter.IsLittleEndian)
+            {
+                byte tmp;
+                tmp = buf[0]; buf[0] = buf[3]; buf[3] = tmp;
+                tmp = buf[1]; buf[1] = buf[2]; buf[2] = tmp;
+                tmp = buf[4]; buf[4] = buf[5]; buf[5] = tmp;
+                tmp = buf[6]; buf[6] = buf[7]; buf[7] = tmp;
+            }
+            return MemoryMarshal.Read<Guid>(buf);
         }
     }
 }

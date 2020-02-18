@@ -67,5 +67,30 @@ namespace UlidTests
             first.ToString().Should().BeEquivalentTo(second.ToString());
             // Console.WriteLine($"first={first.ToString()}, second={second.ToString()}");
         }
+
+        [Fact]
+        public void GuidInterop()
+        {
+            var ulid = Ulid.NewUlid();
+            var guid = ulid.ToGuid();
+            var ulid2 = new Ulid(guid);
+
+            ulid2.Should().BeEquivalentTo(ulid, "a Ulid-Guid roundtrip should result in identical values");
+        }
+
+        [Fact]
+        public void GuidComparison()
+        {
+            var data_smaller = new byte[] { 0, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            var data_larger = new byte[] { 1, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            var ulid_smaller = new Ulid(data_smaller);
+            var ulid_larger = new Ulid(data_larger);
+
+            var guid_smaller = ulid_smaller.ToGuid();
+            var guid_larger = ulid_larger.ToGuid();
+
+            ulid_smaller.CompareTo(ulid_larger).Should().BeLessThan(0, "a Ulid comparison should compare byte to byte");
+            guid_smaller.CompareTo(guid_larger).Should().BeLessThan(0, "a Ulid to Guid cast should preserve order");
+        }
     }
 }
