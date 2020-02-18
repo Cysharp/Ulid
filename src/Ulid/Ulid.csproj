@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.0</TargetFrameworks>
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>System</RootNamespace>
@@ -32,8 +32,18 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0'">
+    <!--<Compile Remove="JsonConverter.cs" />-->
+  </ItemGroup>
+
+  <!-- Support System.Text.Json when target supports -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <!--  <Compile Include="JsonConverter.cs" /> -->
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <DefineConstants>SystemTextJson</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="Icon.png" Pack="true" PackagePath="/" />
   </ItemGroup>
-
 </Project>

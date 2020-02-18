@@ -3,6 +3,9 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+#if SystemTextJson
+using System.Text.Json.Serialization;
+#endif
 
 namespace System // wa-o, System Namespace!?
 {
@@ -12,7 +15,10 @@ namespace System // wa-o, System Namespace!?
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 16)]
     [DebuggerDisplay("{ToString(),nq}")]
-    public struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
+#if SystemTextJson
+    [JsonConverter(typeof(UlidJsonConverter))]
+#endif
+    public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
     {
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
@@ -65,8 +71,7 @@ namespace System // wa-o, System Namespace!?
         [IgnoreDataMember]
         public DateTimeOffset Time
         {
-            get
-            {
+            get {
                 Span<byte> buffer = stackalloc byte[8];
                 buffer[0] = timestamp5;
                 buffer[1] = timestamp4;
