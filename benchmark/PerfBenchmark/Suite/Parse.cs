@@ -1,5 +1,7 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿extern alias newUlid;
+using BenchmarkDotNet.Attributes;
 using System;
+using newUlid::System;
 
 namespace PerfBenchmark.Suite
 {
