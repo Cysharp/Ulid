@@ -31,7 +31,9 @@ namespace System // wa-o, System Namespace!?
 #else
         static ReadOnlySpan<byte> Base32Bytes => new byte[] { 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 74, 75, 77, 78, 80, 81, 82, 83, 84, 86, 87, 88, 89, 90 };
         static ReadOnlySpan<byte> CharToBase32 => new byte[] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31 };
-#endif        
+
+        static readonly Vector128<byte> ReverseMask = Vector128.Create(5, 4, 3, 2, 1, 0, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80);
+#endif
         static readonly DateTimeOffset UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         static ReadOnlySpan<byte> MinRandomness => new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -84,6 +86,15 @@ namespace System // wa-o, System Namespace!?
         {
             get
             {
+#if NETCOREAPP3_0
+                if (Ssse3.IsSupported)
+                {
+                    var vector = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                    var newVector = Ssse3.Shuffle(vector, ReverseMask);
+                    var timestampMillisecondsFromVector = Unsafe.As<Vector128<byte>, long>(ref newVector);
+                    return DateTimeOffset.FromUnixTimeMilliseconds(timestampMillisecondsFromVector);
+                }
+#endif
                 Span<byte> buffer = stackalloc byte[8];
                 buffer[0] = timestamp5;
                 buffer[1] = timestamp4;
