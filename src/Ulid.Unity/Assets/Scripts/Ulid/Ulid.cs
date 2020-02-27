@@ -110,33 +110,62 @@ namespace System // wa-o, System Namespace!?
         }
 
         internal Ulid(long timestampMilliseconds, XorShift64 random)
+#if NETSTANDARD2_0
             : this()
         {
             // Get memory in stack and copy to ulid(Little->Big reverse order).
-            ref var fisrtByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-            this.timestamp0 = Unsafe.Add(ref fisrtByte, 5);
-            this.timestamp1 = Unsafe.Add(ref fisrtByte, 4);
-            this.timestamp2 = Unsafe.Add(ref fisrtByte, 3);
-            this.timestamp3 = Unsafe.Add(ref fisrtByte, 2);
-            this.timestamp4 = Unsafe.Add(ref fisrtByte, 1);
-            this.timestamp5 = Unsafe.Add(ref fisrtByte, 0);
-
+            {
+#else
+        {
+            if (Ssse3.IsSupported)
+            {
+                var vec = Vector128.CreateScalar(timestampMilliseconds).AsByte();
+                var shuffled = Ssse3.Shuffle(vec, TimeReverseMask);
+                this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
+            }
+            else
+            {
+                this = default(Ulid);
+#endif
+                ref var fisrtByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+                this.timestamp0 = Unsafe.Add(ref fisrtByte, 5);
+                this.timestamp1 = Unsafe.Add(ref fisrtByte, 4);
+                this.timestamp2 = Unsafe.Add(ref fisrtByte, 3);
+                this.timestamp3 = Unsafe.Add(ref fisrtByte, 2);
+                this.timestamp4 = Unsafe.Add(ref fisrtByte, 1);
+                this.timestamp5 = Unsafe.Add(ref fisrtByte, 0);
+            }
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
             Unsafe.WriteUnaligned(ref randomness2, random.Next()); // randomness2~9
         }
 
         internal Ulid(long timestampMilliseconds, ReadOnlySpan<byte> randomness)
+#if NETSTANDARD2_0
             : this()
         {
-            ref var fisrtByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-            this.timestamp0 = Unsafe.Add(ref fisrtByte, 5);
-            this.timestamp1 = Unsafe.Add(ref fisrtByte, 4);
-            this.timestamp2 = Unsafe.Add(ref fisrtByte, 3);
-            this.timestamp3 = Unsafe.Add(ref fisrtByte, 2);
-            this.timestamp4 = Unsafe.Add(ref fisrtByte, 1);
-            this.timestamp5 = Unsafe.Add(ref fisrtByte, 0);
-
+            // Get memory in stack and copy to ulid(Little->Big reverse order).
+            {
+#else
+        {
+            if (Ssse3.IsSupported)
+            {
+                var vec = Vector128.CreateScalar(timestampMilliseconds).AsByte();
+                var shuffled = Ssse3.Shuffle(vec, TimeReverseMask);
+                this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
+            }
+            else
+            {
+                this = default(Ulid);
+#endif
+                ref var fisrtByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+                this.timestamp0 = Unsafe.Add(ref fisrtByte, 5);
+                this.timestamp1 = Unsafe.Add(ref fisrtByte, 4);
+                this.timestamp2 = Unsafe.Add(ref fisrtByte, 3);
+                this.timestamp3 = Unsafe.Add(ref fisrtByte, 2);
+                this.timestamp4 = Unsafe.Add(ref fisrtByte, 1);
+                this.timestamp5 = Unsafe.Add(ref fisrtByte, 0);
+            }
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
             randomness1 = randomness[1];
