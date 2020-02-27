@@ -214,6 +214,7 @@ Dapper.SqlMapper.AddTypeHandler(new BinaryUlidHandler());
 ```
 
 **Entity Framework Core**
+
 to use in EF, create ValueConverter and bind it.
 
 ```csharp
