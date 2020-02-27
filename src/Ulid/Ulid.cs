@@ -119,7 +119,7 @@ namespace System // wa-o, System Namespace!?
         {
             if (Ssse3.IsSupported)
             {
-                var vec = Vector128.CreateScalar(timestampMilliseconds).AsByte();
+                var vec = Vector128.CreateScalarUnsafe(timestampMilliseconds).AsByte();
                 var shuffled = Ssse3.Shuffle(vec, TimeReverseMask);
                 this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
             }
@@ -150,7 +150,7 @@ namespace System // wa-o, System Namespace!?
         {
             if (Ssse3.IsSupported)
             {
-                var vec = Vector128.CreateScalar(timestampMilliseconds).AsByte();
+                var vec = Vector128.CreateScalarUnsafe(timestampMilliseconds).AsByte();
                 var shuffled = Ssse3.Shuffle(vec, TimeReverseMask);
                 this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
             }
