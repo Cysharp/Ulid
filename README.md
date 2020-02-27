@@ -189,6 +189,7 @@ public class BinaryUlidHandler : TypeHandler<Ulid>
     public override void SetValue(IDbDataParameter parameter, Ulid value)
     {
         parameter.DbType = DbType.Binary;
+        parameter.Size = 16;
         parameter.Value = value.ToByteArray();
     }
 }
@@ -210,6 +211,37 @@ public class StringUlidHandler : TypeHandler<Ulid>
 
 // setup handler
 Dapper.SqlMapper.AddTypeHandler(new BinaryUlidHandler());
+```
+
+**Entity Framework Core**
+to use in EF, create ValueConverter and bind it.
+
+```csharp
+public class UlidToBytesConverter : ValueConverter<Ulid, byte[]>
+{
+    private static readonly ConverterMappingHints defaultHints = new ConverterMappingHints(size: 16);
+
+    public UlidToBytesConverter(ConverterMappingHints mappingHints = null)
+        : base(
+                convertToProviderExpression: x => x.ToByteArray(),
+                convertFromProviderExpression: x => new Ulid(x),
+                mappingHints: defaultHints.With(mappingHints))
+    {
+    }
+}
+
+public class UlidToStringConverter : ValueConverter<Ulid, string>
+{
+    private static readonly ConverterMappingHints defaultHints = new ConverterMappingHints(size: 26);
+
+    public UlidToStringConverter(ConverterMappingHints mappingHints = null)
+        : base(
+                convertToProviderExpression: x => x.ToString(),
+                convertFromProviderExpression: x => Ulid.Parse(x),
+                mappingHints: defaultHints.With(mappingHints))
+    {
+    }
+}
 ```
 
 License
