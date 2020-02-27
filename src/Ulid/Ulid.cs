@@ -4,6 +4,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
+#if NETCOREAPP3_0
+using System.Numerics;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+#endif
 
 namespace System // wa-o, System Namespace!?
 {
@@ -420,6 +425,12 @@ namespace System // wa-o, System Namespace!?
 
         public unsafe bool Equals(Ulid other)
         {
+#if NETCOREAPP3_0
+            if (Sse2.IsSupported)
+            {
+                return Unsafe.As<Ulid, Vector128<byte>>(ref this).Equals(Unsafe.As<Ulid, Vector128<byte>>(ref other));
+            }
+#endif
             // readonly struct can not use Unsafe.As...
             fixed (byte* a = &this.timestamp0)
             {
@@ -460,6 +471,17 @@ namespace System // wa-o, System Namespace!?
 
         public int CompareTo(Ulid other)
         {
+#if NETCOREAPP3_0
+            if (Sse2.IsSupported)
+            {
+                var thisVec = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                var otherVec = Unsafe.As<Ulid, Vector128<byte>>(ref other);
+                var match = Sse2.MoveMask(Sse2.CompareEqual(thisVec, otherVec));
+                if (match == ushort.MaxValue) return 0;
+                var offset = BitOperations.TrailingZeroCount(~match);
+                return Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref this), offset).CompareTo(Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref other), offset));
+            }
+#endif
             if (this.timestamp0 != other.timestamp0) return GetResult(this.timestamp0, other.timestamp0);
             if (this.timestamp1 != other.timestamp1) return GetResult(this.timestamp1, other.timestamp1);
             if (this.timestamp2 != other.timestamp2) return GetResult(this.timestamp2, other.timestamp2);

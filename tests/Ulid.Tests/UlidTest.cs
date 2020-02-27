@@ -90,6 +90,7 @@ namespace UlidTests
             var guid_larger = ulid_larger.ToGuid();
 
             ulid_smaller.CompareTo(ulid_larger).Should().BeLessThan(0, "a Ulid comparison should compare byte to byte");
+            ulid_smaller.CompareTo(ulid_smaller).Should().Be(0, "a Ulid comparison should compare byte to byte");
             guid_smaller.CompareTo(guid_larger).Should().BeLessThan(0, "a Ulid to Guid cast should preserve order");
         }
     }

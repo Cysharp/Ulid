@@ -1,7 +1,9 @@
-﻿extern alias newUlid;
+﻿extern alias Ulid_1_0_0;
+extern alias newUlid;
 using BenchmarkDotNet.Attributes;
 using System;
-using newUlid::System;
+using OldUlid = Ulid_1_0_0::System.Ulid;
+using NewUlid = newUlid::System.Ulid;
 
 namespace PerfBenchmark.Suite
 {
@@ -9,14 +11,16 @@ namespace PerfBenchmark.Suite
     public class CompareTo
     {
         Guid guid;
-        Ulid ulid;
+        OldUlid oldUlid;
+        NewUlid ulid;
         NUlid.Ulid nulid;
 
         [GlobalSetup]
         public void Setup()
         {
             guid = Guid.NewGuid();
-            ulid = new Ulid(guid.ToByteArray());
+            oldUlid = new OldUlid(guid.ToByteArray());
+            ulid = new NewUlid(guid.ToByteArray());
             nulid = new NUlid.Ulid(guid.ToByteArray());
         }
 
@@ -24,6 +28,12 @@ namespace PerfBenchmark.Suite
         public int Guid_()
         {
             return guid.CompareTo(guid);
+        }
+
+        [Benchmark]
+        public int OldUlid_()
+        {
+            return oldUlid.CompareTo(oldUlid);
         }
 
         [Benchmark]
