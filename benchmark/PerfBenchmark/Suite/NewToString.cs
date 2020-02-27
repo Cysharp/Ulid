@@ -1,7 +1,9 @@
-﻿extern alias newUlid;
+﻿extern alias Ulid_1_0_0;
+extern alias newUlid;
 using BenchmarkDotNet.Attributes;
 using System;
-using newUlid::System;
+using OldUlid = Ulid_1_0_0::System.Ulid;
+using NewUlid = newUlid::System.Ulid;
 
 namespace PerfBenchmark.Suite
 {
@@ -15,9 +17,15 @@ namespace PerfBenchmark.Suite
         }
 
         [Benchmark]
+        public string OldUlid_()
+        {
+            return OldUlid.NewUlid().ToString();
+        }        
+        
+        [Benchmark]
         public string Ulid_()
         {
-            return Ulid.NewUlid().ToString();
+            return NewUlid.NewUlid().ToString();
         }
 
         [Benchmark]

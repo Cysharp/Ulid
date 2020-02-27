@@ -32,7 +32,8 @@ namespace System // wa-o, System Namespace!?
         static ReadOnlySpan<byte> Base32Bytes => new byte[] { 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 74, 75, 77, 78, 80, 81, 82, 83, 84, 86, 87, 88, 89, 90 };
         static ReadOnlySpan<byte> CharToBase32 => new byte[] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31 };
 
-        static readonly Vector128<byte> ReverseMask = Vector128.Create(5, 4, 3, 2, 1, 0, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80);
+        static readonly Vector128<byte> TimeReverseMask = Vector128.Create(5, 4, 3, 2, 1, 0, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80);
+        static readonly Vector128<byte> GuidReverseMask = Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15);
 #endif
         static readonly DateTimeOffset UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -90,7 +91,7 @@ namespace System // wa-o, System Namespace!?
                 if (Ssse3.IsSupported)
                 {
                     var vector = Unsafe.As<Ulid, Vector128<byte>>(ref this);
-                    var newVector = Ssse3.Shuffle(vector, ReverseMask);
+                    var newVector = Ssse3.Shuffle(vector, TimeReverseMask);
                     var timestampMillisecondsFromVector = Unsafe.As<Vector128<byte>, long>(ref newVector);
                     return DateTimeOffset.FromUnixTimeMilliseconds(timestampMillisecondsFromVector);
                 }
@@ -181,6 +182,18 @@ namespace System // wa-o, System Namespace!?
         // source: https://github.com/dotnet/runtime/blob/4f9ae42d861fcb4be2fcd5d3d55d5f227d30e723/src/libraries/System.Private.CoreLib/src/System/Guid.cs
         public Ulid(Guid guid)
         {
+#if NETCOREAPP3_0
+            if (Ssse3.IsSupported)
+            {
+                var vec = Unsafe.As<Guid, Vector128<byte>>(ref guid);
+                if (BitConverter.IsLittleEndian)
+                {
+                    vec = Ssse3.Shuffle(vec, GuidReverseMask);
+                }
+                this = Unsafe.As<Vector128<byte>, Ulid>(ref vec);
+                return;
+            }
+#endif
             Span<byte> buf = stackalloc byte[16];
             MemoryMarshal.Write(buf, ref guid);
             if (BitConverter.IsLittleEndian)
@@ -427,11 +440,8 @@ namespace System // wa-o, System Namespace!?
         public override unsafe int GetHashCode()
         {
             // Simply XOR, same algorithm of Guid.GetHashCode
-            fixed (void* p = &this.timestamp0)
-            {
-                var a = (int*)p;
-                return (*a) ^ *(a + 1) ^ *(a + 2) ^ *(a + 3);
-            }
+            ref var i = ref Unsafe.As<Ulid, int>(ref this);
+            return i ^ Unsafe.Add(ref i, 1) ^ Unsafe.Add(ref i, 2) ^ Unsafe.Add(ref i, 3);
         }
 
         public unsafe bool Equals(Ulid other)
@@ -439,7 +449,10 @@ namespace System // wa-o, System Namespace!?
 #if NETCOREAPP3_0
             if (Sse2.IsSupported)
             {
-                return Unsafe.As<Ulid, Vector128<byte>>(ref this).Equals(Unsafe.As<Ulid, Vector128<byte>>(ref other));
+                var thisVec = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                var otherVec = Unsafe.As<Ulid, Vector128<byte>>(ref other);
+                var match = Sse2.MoveMask(Sse2.CompareEqual(thisVec, otherVec));
+                return match == ushort.MaxValue;
             }
 #endif
             // readonly struct can not use Unsafe.As...
@@ -528,6 +541,17 @@ namespace System // wa-o, System Namespace!?
         /// <returns>The converted <c>Guid</c> value</returns>
         public Guid ToGuid()
         {
+#if NETCOREAPP3_0
+            if (Ssse3.IsSupported)
+            {
+                var vec = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                if (BitConverter.IsLittleEndian)
+                {
+                    vec = Ssse3.Shuffle(vec, GuidReverseMask);
+                }
+                return Unsafe.As<Vector128<byte>, Guid>(ref vec);
+            }
+#endif
             Span<byte> buf = stackalloc byte[16];
             MemoryMarshal.Write(buf, ref this);
             if (BitConverter.IsLittleEndian)

@@ -8,9 +8,8 @@ using NewUlid = newUlid::System.Ulid;
 namespace PerfBenchmark.Suite
 {
     [Config(typeof(BenchmarkConfig))]
-    public class GetHashCode
+    public class GetGuid
     {
-        Guid guid;
         OldUlid oldUlid;
         NewUlid ulid;
         NUlid.Ulid nulid;
@@ -18,34 +17,28 @@ namespace PerfBenchmark.Suite
         [GlobalSetup]
         public void Setup()
         {
-            guid = Guid.NewGuid();
+            var guid = Guid.NewGuid();
             oldUlid = new OldUlid(guid.ToByteArray());
             ulid = new NewUlid(guid.ToByteArray());
             nulid = new NUlid.Ulid(guid.ToByteArray());
         }
 
-        [Benchmark(Baseline = true)]
-        public int Guid_()
+        [Benchmark]
+        public Guid OldUlid_()
         {
-            return guid.GetHashCode();
+            return oldUlid.ToGuid();
         }
 
         [Benchmark]
-        public int OldUlid_()
+        public Guid Ulid_()
         {
-            return oldUlid.GetHashCode();
-        }
-
-       [Benchmark]
-        public int Ulid_()
-        {
-            return ulid.GetHashCode();
+            return ulid.ToGuid();
         }
 
         [Benchmark]
-        public int NUlid_()
+        public Guid NUlid_()
         {
-            return nulid.GetHashCode();
+            return nulid.ToGuid();
         }
     }
 }
