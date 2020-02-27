@@ -57,14 +57,18 @@ namespace UlidTests
                 Ulid.Parse(nulid.ToString()).ToByteArray().Should().BeEquivalentTo(nulid.ToByteArray());
             }
         }
+
         [Fact]
         public void Randomness()
         {
             var d = DateTime.Parse("1970/1/1 00:00:00Z");
             var r = new byte[10];
+            var random = new Random();
+            random.NextBytes(r);
             var first = Ulid.NewUlid(d, r);
             var second = Ulid.NewUlid(d, r);
             first.ToString().Should().BeEquivalentTo(second.ToString());
+            first.Random.Should().BeEquivalentTo(r);
             // Console.WriteLine($"first={first.ToString()}, second={second.ToString()}");
         }
 

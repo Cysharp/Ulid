@@ -155,8 +155,7 @@ namespace System // wa-o, System Namespace!?
             if (Ssse3.IsSupported)
             {
                 ref var src1 = ref MemoryMarshal.GetReference(randomness);
-                var e0 = timestampMilliseconds ^ (Unsafe.As<byte, long>(ref src1) << 48);
-                //var e0 = (timestampMilliseconds & 0xFFFF_FFFF_FFFF) | (Unsafe.As<byte, long>(ref src1) << 48);
+                var e0 = (timestampMilliseconds & 0xFFFF_FFFF_FFFF) | (Unsafe.As<byte, long>(ref src1) << 48);
                 var vec = Vector128.Create(e0, Unsafe.As<byte, long>(ref Unsafe.Add(ref src1, 2))).AsByte(); 
                 var shuffled = Ssse3.Shuffle(vec, CtorReverseMask);
                 this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
