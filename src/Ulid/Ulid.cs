@@ -33,6 +33,7 @@ namespace System // wa-o, System Namespace!?
         static ReadOnlySpan<byte> CharToBase32 => new byte[] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31 };
 
         static readonly Vector128<byte> TimeReverseMask = Vector128.Create(5, 4, 3, 2, 1, 0, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80);
+        static readonly Vector128<byte> CtorReverseMask = Vector128.Create((byte)5, 4, 3, 2, 1, 0, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
         static readonly Vector128<byte> GuidReverseMask = Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15);
 #endif
         static readonly DateTimeOffset UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -119,9 +120,12 @@ namespace System // wa-o, System Namespace!?
         {
             if (Ssse3.IsSupported)
             {
-                var vec = Vector128.CreateScalarUnsafe(timestampMilliseconds).AsByte();
-                var shuffled = Ssse3.Shuffle(vec, TimeReverseMask);
+                var e0 = ((ulong)timestampMilliseconds) ^ (random.Next() << 48);
+                //var e0 = ((ulong)timestampMilliseconds & 0xFFFF_FFFF_FFFF) | (random.Next() << 48);
+                var vec = Vector128.Create(e0, random.Next()).AsByte();
+                var shuffled = Ssse3.Shuffle(vec, CtorReverseMask);
                 this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
+                return;
             }
             else
             {
@@ -150,9 +154,13 @@ namespace System // wa-o, System Namespace!?
         {
             if (Ssse3.IsSupported)
             {
-                var vec = Vector128.CreateScalarUnsafe(timestampMilliseconds).AsByte();
-                var shuffled = Ssse3.Shuffle(vec, TimeReverseMask);
+                ref var src1 = ref MemoryMarshal.GetReference(randomness);
+                var e0 = timestampMilliseconds ^ (Unsafe.As<byte, long>(ref src1) << 48);
+                //var e0 = (timestampMilliseconds & 0xFFFF_FFFF_FFFF) | (Unsafe.As<byte, long>(ref src1) << 48);
+                var vec = Vector128.Create(e0, Unsafe.As<byte, long>(ref Unsafe.Add(ref src1, 2))).AsByte(); 
+                var shuffled = Ssse3.Shuffle(vec, CtorReverseMask);
                 this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
+                return;
             }
             else
             {
