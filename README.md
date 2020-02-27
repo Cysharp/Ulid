@@ -174,6 +174,44 @@ MessagePackSerializer.Serialize(Ulid.NewUlid(), options);
 
 If you want to use this custom formatter on Unity, download [UlidMessagePackFormatter.cs](https://github.com/Cysharp/Ulid/blob/master/src/Ulid.MessagePack/UlidMessagePackFormatter.cs).
 
+**Dapper**
+
+For [Dapper](https://github.com/StackExchange/Dapper) or other ADO.NET database mapper, register custom converter from Ulid to binary or Ulid to string.
+
+```csharp
+public class BinaryUlidHandler : TypeHandler<Ulid>
+{
+    public override Ulid Parse(object value)
+    {
+        return new Ulid((byte[])value);
+    }
+
+    public override void SetValue(IDbDataParameter parameter, Ulid value)
+    {
+        parameter.DbType = DbType.Binary;
+        parameter.Value = value.ToByteArray();
+    }
+}
+
+public class StringUlidHandler : TypeHandler<Ulid>
+{
+    public override Ulid Parse(object value)
+    {
+        return Ulid.Parse((string)value);
+    }
+
+    public override void SetValue(IDbDataParameter parameter, Ulid value)
+    {
+        parameter.DbType = DbType.StringFixedLength;
+        parameter.Size = 26;
+        parameter.Value = value.ToString();
+    }
+}
+
+// setup handler
+Dapper.SqlMapper.AddTypeHandler(new BinaryUlidHandler());
+```
+
 License
 ---
 This library is under the MIT License.
