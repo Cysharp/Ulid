@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 #if NETCOREAPP3_0
+using System.Buffers.Binary;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
@@ -131,13 +132,13 @@ namespace System // wa-o, System Namespace!?
             {
                 this = default(Ulid);
 #endif
-                ref var fisrtByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-                this.timestamp0 = Unsafe.Add(ref fisrtByte, 5);
-                this.timestamp1 = Unsafe.Add(ref fisrtByte, 4);
-                this.timestamp2 = Unsafe.Add(ref fisrtByte, 3);
-                this.timestamp3 = Unsafe.Add(ref fisrtByte, 2);
-                this.timestamp4 = Unsafe.Add(ref fisrtByte, 1);
-                this.timestamp5 = Unsafe.Add(ref fisrtByte, 0);
+                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
             }
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
@@ -165,13 +166,13 @@ namespace System // wa-o, System Namespace!?
             {
                 this = default(Ulid);
 #endif
-                ref var fisrtByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-                this.timestamp0 = Unsafe.Add(ref fisrtByte, 5);
-                this.timestamp1 = Unsafe.Add(ref fisrtByte, 4);
-                this.timestamp2 = Unsafe.Add(ref fisrtByte, 3);
-                this.timestamp3 = Unsafe.Add(ref fisrtByte, 2);
-                this.timestamp4 = Unsafe.Add(ref fisrtByte, 1);
-                this.timestamp5 = Unsafe.Add(ref fisrtByte, 0);
+                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
             }
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
@@ -180,13 +181,10 @@ namespace System // wa-o, System Namespace!?
         }
 
         public Ulid(ReadOnlySpan<byte> bytes)
-            : this()
+            //: this()
         {
             if (bytes.Length != 16) throw new ArgumentException("invalid bytes length, length:" + bytes.Length);
-
-            ref var src = ref MemoryMarshal.GetReference(bytes);
-            Unsafe.WriteUnaligned(ref timestamp0, Unsafe.As<byte, ulong>(ref src)); // timestamp0~randomness1
-            Unsafe.WriteUnaligned(ref randomness2, Unsafe.As<byte, ulong>(ref Unsafe.Add(ref src, 8))); // randomness2~randomness9
+            this = MemoryMarshal.Read<Ulid>(bytes);
         }
 
         internal Ulid(ReadOnlySpan<char> base32)
@@ -473,7 +471,7 @@ namespace System // wa-o, System Namespace!?
 
         // Comparable/Equatable
 
-        public override unsafe int GetHashCode()
+        public override int GetHashCode()
         {
             // Simply XOR, same algorithm of Guid.GetHashCode
             ref var i = ref Unsafe.As<Ulid, int>(ref this);
@@ -580,7 +578,7 @@ namespace System // wa-o, System Namespace!?
             if (BitConverter.IsLittleEndian)
             {
 #if NETCOREAPP3_0
-                if (false && Ssse3.IsSupported)
+                if (Ssse3.IsSupported)
                 {
                     var vec = Unsafe.As<Ulid, Vector128<byte>>(ref this);
                     vec = Ssse3.Shuffle(vec, GuidReverseMask);
