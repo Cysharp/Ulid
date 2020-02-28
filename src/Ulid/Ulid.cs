@@ -70,6 +70,9 @@ namespace System // wa-o, System Namespace!?
         [FieldOffset(15)] readonly byte randomness9;
 
         [IgnoreDataMember]
+#if NETCOREAPP3_0
+        readonly
+#endif
         public byte[] Random => new byte[]
         {
             randomness0,
@@ -85,6 +88,9 @@ namespace System // wa-o, System Namespace!?
         };
 
         [IgnoreDataMember]
+#if NETCOREAPP3_0
+        readonly
+#endif
         public DateTimeOffset Time
         {
             get
@@ -92,7 +98,7 @@ namespace System // wa-o, System Namespace!?
 #if NETCOREAPP3_0
                 if (Ssse3.IsSupported)
                 {
-                    var vector = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                    var vector = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in this));
                     var newVector = Ssse3.Shuffle(vector, TimeReverseMask);
                     var timestampMillisecondsFromVector = Unsafe.As<Vector128<byte>, long>(ref newVector);
                     return DateTimeOffset.FromUnixTimeMilliseconds(timestampMillisecondsFromVector);
@@ -122,7 +128,6 @@ namespace System // wa-o, System Namespace!?
             if (Ssse3.IsSupported)
             {
                 var e0 = ((ulong)timestampMilliseconds) ^ (random.Next() << 48);
-                //var e0 = ((ulong)timestampMilliseconds & 0xFFFF_FFFF_FFFF) | (random.Next() << 48);
                 var vec = Vector128.Create(e0, random.Next()).AsByte();
                 var shuffled = Ssse3.Shuffle(vec, CtorReverseMask);
                 this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
@@ -350,7 +355,9 @@ namespace System // wa-o, System Namespace!?
         }
 
         // Convert
-
+#if NETCOREAPP3_0
+        readonly
+#endif
         public byte[] ToByteArray()
         {
             var bytes = new byte[16];
@@ -358,6 +365,9 @@ namespace System // wa-o, System Namespace!?
             return bytes;
         }
 
+#if NETCOREAPP3_0
+        readonly
+#endif
         public bool TryWriteBytes(Span<byte> destination)
         {
             if (destination.Length < 16)
@@ -369,6 +379,9 @@ namespace System // wa-o, System Namespace!?
             return true;
         }
 
+#if NETCOREAPP3_0
+        readonly
+#endif
         public string ToBase64(Base64FormattingOptions options = Base64FormattingOptions.None)
         {
             var buffer = ArrayPool<byte>.Shared.Rent(16);
@@ -383,6 +396,9 @@ namespace System // wa-o, System Namespace!?
             }
         }
 
+#if NETCOREAPP3_0
+        readonly
+#endif
         public bool TryWriteStringify(Span<byte> span)
         {
             if (span.Length < 26) return false;
@@ -421,6 +437,9 @@ namespace System // wa-o, System Namespace!?
             return true;
         }
 
+#if NETCOREAPP3_0
+        readonly
+#endif
         public bool TryWriteStringify(Span<char> span)
         {
             if (span.Length < 26) return false;
@@ -459,6 +478,9 @@ namespace System // wa-o, System Namespace!?
             return true;
         }
 
+#if NETCOREAPP3_0
+        readonly
+#endif
         public override string ToString()
         {
             Span<char> span = stackalloc char[26];
@@ -470,20 +492,25 @@ namespace System // wa-o, System Namespace!?
         }
 
         // Comparable/Equatable
-
+#if NETCOREAPP3_0
+        readonly
+#endif
         public override int GetHashCode()
         {
             // Simply XOR, same algorithm of Guid.GetHashCode
-            ref var i = ref Unsafe.As<Ulid, int>(ref this);
+            ref var i = ref Unsafe.As<Ulid, int>(ref Unsafe.AsRef(in this));
             return i ^ Unsafe.Add(ref i, 1) ^ Unsafe.Add(ref i, 2) ^ Unsafe.Add(ref i, 3);
         }
 
+#if NETCOREAPP3_0
+        readonly
+#endif
         public unsafe bool Equals(Ulid other)
         {
 #if NETCOREAPP3_0
             if (Sse2.IsSupported)
             {
-                var thisVec = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                var thisVec = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in this));
                 var otherVec = Unsafe.As<Ulid, Vector128<byte>>(ref other);
                 var match = Sse2.MoveMask(Sse2.CompareEqual(thisVec, otherVec));
                 return match == ushort.MaxValue;
@@ -509,6 +536,9 @@ namespace System // wa-o, System Namespace!?
             }
         }
 
+#if NETCOREAPP3_0
+        readonly
+#endif
         public override bool Equals(object obj)
         {
             return (obj is Ulid other) ? this.Equals(other) : false;
@@ -525,19 +555,22 @@ namespace System // wa-o, System Namespace!?
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int GetResult(byte me, byte them) => me < them ? -1 : 1;
+        private static int GetResult(byte me, byte them) => me < them ? -1 : 1;
 
+#if NETCOREAPP3_0
+        readonly
+#endif
         public int CompareTo(Ulid other)
         {
 #if NETCOREAPP3_0
             if (Sse2.IsSupported)
             {
-                var thisVec = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                var thisVec = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in this));
                 var otherVec = Unsafe.As<Ulid, Vector128<byte>>(ref other);
                 var match = Sse2.MoveMask(Sse2.CompareEqual(thisVec, otherVec));
                 if (match == ushort.MaxValue) return 0;
                 var offset = BitOperations.TrailingZeroCount(~match);
-                return Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref this), offset).CompareTo(Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref other), offset));
+                return Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref Unsafe.AsRef(in this)), offset).CompareTo(Unsafe.Add(ref Unsafe.As<Ulid, byte>(ref other), offset));
             }
 #endif
             if (this.timestamp0 != other.timestamp0) return GetResult(this.timestamp0, other.timestamp0);
@@ -573,6 +606,9 @@ namespace System // wa-o, System Namespace!?
         /// The byte arrangement between Ulid and Guid is not preserved.
         /// </remarks>
         /// <returns>The converted <c>Guid</c> value</returns>
+#if NETCOREAPP3_0
+        readonly
+#endif
         public Guid ToGuid()
         {
             if (BitConverter.IsLittleEndian)
@@ -580,14 +616,14 @@ namespace System // wa-o, System Namespace!?
 #if NETCOREAPP3_0
                 if (Ssse3.IsSupported)
                 {
-                    var vec = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                    var vec = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in this));
                     vec = Ssse3.Shuffle(vec, GuidReverseMask);
                     return Unsafe.As<Vector128<byte>, Guid>(ref vec);
                 }
                 else
                 {
                     Span<byte> buf = stackalloc byte[16];
-                    MemoryMarshal.Write(buf, ref this);
+                    MemoryMarshal.Write(buf, ref Unsafe.AsRef(in this));
                     ref var src = ref MemoryMarshal.AsRef<uint>(buf);
                     src = BinaryPrimitives.ReverseEndianness(src);
                     ref var src4 = ref Unsafe.As<uint, ushort>(ref Unsafe.Add(ref src, 1));
@@ -596,9 +632,9 @@ namespace System // wa-o, System Namespace!?
                     src6 = BinaryPrimitives.ReverseEndianness(src6);
                     return MemoryMarshal.Read<Guid>(buf);
                 }
-#else              
+#else
                 Span<byte> buf = stackalloc byte[16];
-                MemoryMarshal.Write(buf, ref this);
+                MemoryMarshal.Write(buf, ref Unsafe.AsRef(in this));
                 byte tmp;
                 tmp = buf[0]; buf[0] = buf[3]; buf[3] = tmp;
                 tmp = buf[1]; buf[1] = buf[2]; buf[2] = tmp;
@@ -609,7 +645,7 @@ namespace System // wa-o, System Namespace!?
             }
             else
             {
-                return Unsafe.As<Ulid, Guid>(ref this);
+                return Unsafe.As<Ulid, Guid>(ref Unsafe.AsRef(in this));
             }
         }
     }
