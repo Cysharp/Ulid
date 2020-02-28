@@ -577,28 +577,42 @@ namespace System // wa-o, System Namespace!?
         /// <returns>The converted <c>Guid</c> value</returns>
         public Guid ToGuid()
         {
-#if NETCOREAPP3_0
-            if (Ssse3.IsSupported)
-            {
-                var vec = Unsafe.As<Ulid, Vector128<byte>>(ref this);
-                if (BitConverter.IsLittleEndian)
-                {
-                    vec = Ssse3.Shuffle(vec, GuidReverseMask);
-                }
-                return Unsafe.As<Vector128<byte>, Guid>(ref vec);
-            }
-#endif
-            Span<byte> buf = stackalloc byte[16];
-            MemoryMarshal.Write(buf, ref this);
             if (BitConverter.IsLittleEndian)
             {
+#if NETCOREAPP3_0
+                if (false && Ssse3.IsSupported)
+                {
+                    var vec = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                    vec = Ssse3.Shuffle(vec, GuidReverseMask);
+                    return Unsafe.As<Vector128<byte>, Guid>(ref vec);
+                }
+                else
+                {
+                    Span<byte> buf = stackalloc byte[16];
+                    MemoryMarshal.Write(buf, ref this);
+                    ref var src = ref MemoryMarshal.AsRef<uint>(buf);
+                    src = BinaryPrimitives.ReverseEndianness(src);
+                    ref var src4 = ref Unsafe.As<uint, ushort>(ref Unsafe.Add(ref src, 1));
+                    src4 = BinaryPrimitives.ReverseEndianness(src4);
+                    ref var src6 = ref Unsafe.Add(ref src4, 1);
+                    src6 = BinaryPrimitives.ReverseEndianness(src6);
+                    return MemoryMarshal.Read<Guid>(buf);
+                }
+#else              
+                Span<byte> buf = stackalloc byte[16];
+                MemoryMarshal.Write(buf, ref this);
                 byte tmp;
                 tmp = buf[0]; buf[0] = buf[3]; buf[3] = tmp;
                 tmp = buf[1]; buf[1] = buf[2]; buf[2] = tmp;
                 tmp = buf[4]; buf[4] = buf[5]; buf[5] = tmp;
                 tmp = buf[6]; buf[6] = buf[7]; buf[7] = tmp;
+                return MemoryMarshal.Read<Guid>(buf);
+#endif
             }
-            return MemoryMarshal.Read<Guid>(buf);
+            else
+            {
+                return Unsafe.As<Ulid, Guid>(ref this);
+            }
         }
     }
 }
