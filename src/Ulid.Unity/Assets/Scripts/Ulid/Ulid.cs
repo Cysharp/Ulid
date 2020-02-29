@@ -118,12 +118,7 @@ namespace System // wa-o, System Namespace!?
         }
 
         internal Ulid(long timestampMilliseconds, XorShift64 random)
-#if NETSTANDARD2_0
-            : this()
-        {
-            // Get memory in stack and copy to ulid(Little->Big reverse order).
-            {
-#else
+#if NETCOREAPP3_0
         {
             if (Ssse3.IsSupported)
             {
@@ -135,28 +130,33 @@ namespace System // wa-o, System Namespace!?
             }
             else
             {
-                this = default(Ulid);
-#endif
-                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+                var reversed = BinaryPrimitives.ReverseEndianness((ulong)timestampMilliseconds) >> 16;
+                var e0 = reversed ^ (random.Next() << 48);
+                //sse2 or no simd fall back
+                var vec = Vector128.Create(e0, random.Next());
+                this = Unsafe.As<Vector128<ulong>, Ulid>(ref vec);
+                return;
             }
+#else            
+            : this()
+        {
+            ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
             Unsafe.WriteUnaligned(ref randomness2, random.Next()); // randomness2~9
+#endif        
         }
 
         internal Ulid(long timestampMilliseconds, ReadOnlySpan<byte> randomness)
-#if NETSTANDARD2_0
-            : this()
-        {
             // Get memory in stack and copy to ulid(Little->Big reverse order).
-            {
-#else
+#if NETCOREAPP3_0
         {
             if (Ssse3.IsSupported)
             {
@@ -169,24 +169,33 @@ namespace System // wa-o, System Namespace!?
             }
             else
             {
-                this = default(Ulid);
-#endif
-                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+                var reversed = BinaryPrimitives.ReverseEndianness((ulong)timestampMilliseconds) >> 16;
+                ref var src1 = ref MemoryMarshal.GetReference(randomness);
+                var e0 = reversed ^ (Unsafe.As<byte, ulong>(ref src1) << 48);
+                //sse2 or no simd fall back
+                var vec = Vector128.Create(e0, Unsafe.As<byte, ulong>(ref Unsafe.Add(ref src1, 2)));
+                this = Unsafe.As<Vector128<ulong>, Ulid>(ref vec);
+                return;
             }
+#else
+            : this()
+        {
+            ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
             randomness1 = randomness[1];
             Unsafe.WriteUnaligned(ref randomness2, Unsafe.As<byte, ulong>(ref Unsafe.Add(ref src, 2))); // randomness2~randomness9
+#endif
         }
 
         public Ulid(ReadOnlySpan<byte> bytes)
-            //: this()
         {
             if (bytes.Length != 16) throw new ArgumentException("invalid bytes length, length:" + bytes.Length);
             this = MemoryMarshal.Read<Ulid>(bytes);
@@ -516,24 +525,9 @@ namespace System // wa-o, System Namespace!?
                 return match == ushort.MaxValue;
             }
 #endif
-            // readonly struct can not use Unsafe.As...
-            fixed (byte* a = &this.timestamp0)
-            {
-                byte* b = &other.timestamp0;
-
-                {
-                    var x = *(ulong*)a;
-                    var y = *(ulong*)b;
-                    if (x != y) return false;
-                }
-                {
-                    var x = *(ulong*)(a + 8);
-                    var y = *(ulong*)(b + 8);
-                    if (x != y) return false;
-                }
-
-                return true;
-            }
+            ref var tl = ref Unsafe.As<Ulid, ulong>(ref Unsafe.AsRef(in this));
+            ref var ol = ref Unsafe.As<Ulid, ulong>(ref Unsafe.AsRef(in this));
+            return tl == ol && Unsafe.Add(ref tl, 1) == Unsafe.Add(ref ol, 1);
         }
 
 #if NETCOREAPP3_0
