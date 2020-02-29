@@ -516,17 +516,8 @@ namespace System // wa-o, System Namespace!?
 #endif
         public unsafe bool Equals(Ulid other)
         {
-#if NETCOREAPP3_0
-            if (Sse2.IsSupported)
-            {
-                var thisVec = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in this));
-                var otherVec = Unsafe.As<Ulid, Vector128<byte>>(ref other);
-                var match = Sse2.MoveMask(Sse2.CompareEqual(thisVec, otherVec));
-                return match == ushort.MaxValue;
-            }
-#endif
             ref var tl = ref Unsafe.As<Ulid, ulong>(ref Unsafe.AsRef(in this));
-            ref var ol = ref Unsafe.As<Ulid, ulong>(ref Unsafe.AsRef(in this));
+            ref var ol = ref Unsafe.As<Ulid, ulong>(ref Unsafe.AsRef(in other));
             return tl == ol && Unsafe.Add(ref tl, 1) == Unsafe.Add(ref ol, 1);
         }
 
