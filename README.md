@@ -1,6 +1,6 @@
 Ulid
 ===
-[![CircleCI](https://circleci.com/gh/Cysharp/Ulid.svg?style=svg)](https://circleci.com/gh/Cysharp/Ulid)
+[![GitHub Actions](https://github.com/Cysharp/Ulid/workflows/Build-Debug/badge.svg)](https://github.com/Cysharp/Ulid/actions) [![Releases](https://img.shields.io/github/release/Cysharp/Ulid.svg)](https://github.com/Cysharp/Ulid/releases)
 
 Fast C# Implementation of [ULID](https://github.com/ulid/spec) for .NET Core and Unity. Ulid is sortable, random id generator. This project aims performance by fastest binary serializer([MessagePack-CSharp](https://github.com/neuecc/MessagePack-CSharp/)) technology. It achives faster generate than Guid.NewGuid.
 
@@ -11,6 +11,18 @@ NuGet: [Ulid](https://www.nuget.org/packages/Ulid) or download .unitypackage fro
 ```
 Install-Package Ulid
 ```
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of Contents
+
+- [How to use](#how-to-use)
+- [Performance](#performance)
+- [Cli](#cli)
+- [Integrate](#integrate)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 How to use
 ---
