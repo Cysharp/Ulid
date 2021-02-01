@@ -25,7 +25,7 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         static Random CreateRandom()
         {
-            using (var rng = new RNGCryptoServiceProvider())
+            using (var rng = RandomNumberGenerator.Create())
             {
                 // Span<byte> buffer = stackalloc byte[sizeof(int)];
                 var buffer = new byte[sizeof(int)];
