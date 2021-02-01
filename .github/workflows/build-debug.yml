@@ -22,7 +22,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.x
+          dotnet-version: 3.1.403
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.100
 
       # build CommandTools first (using dotnet run command in ZLogger.csproj)
       - run: dotnet build -c Debug src/Ulid
