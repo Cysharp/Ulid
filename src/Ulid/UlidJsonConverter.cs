@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP3_0 || SYSTEM_TEXT_JSON
+﻿#if NETCOREAPP3_1 || NET5_0 || SYSTEM_TEXT_JSON
 
 using System;
 using System.Buffers;

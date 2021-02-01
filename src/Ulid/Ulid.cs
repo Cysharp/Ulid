@@ -15,7 +15,7 @@ namespace System // wa-o, System Namespace!?
     [StructLayout(LayoutKind.Explicit, Size = 16)]
     [DebuggerDisplay("{ToString(),nq}")]
     [TypeConverter(typeof(UlidTypeConverter))]
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1 || NET5_0
     [System.Text.Json.Serialization.JsonConverter(typeof(Cysharp.Serialization.Json.UlidJsonConverter))]
 #endif
     public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
