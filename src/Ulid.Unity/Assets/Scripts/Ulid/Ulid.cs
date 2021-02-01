@@ -193,7 +193,7 @@ namespace System // wa-o, System Namespace!?
 
         public static Ulid Parse(string base32)
         {
-            return new Ulid(base32.AsSpan());
+            return Parse(base32.AsSpan());
         }
 
         public static Ulid Parse(ReadOnlySpan<char> base32)

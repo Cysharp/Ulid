@@ -92,5 +92,19 @@ namespace UlidTests
             ulid_smaller.CompareTo(ulid_larger).Should().BeLessThan(0, "a Ulid comparison should compare byte to byte");
             guid_smaller.CompareTo(guid_larger).Should().BeLessThan(0, "a Ulid to Guid cast should preserve order");
         }
+
+        [Fact]
+        public void UlidParseRejectsInvalidStrings()
+        {
+            Assert.Throws<ArgumentException>(() => Ulid.Parse("1234"));
+            Assert.Throws<ArgumentException>(() => Ulid.Parse(Guid.NewGuid().ToString()));
+        }
+
+        [Fact]
+        void UlidTryParseFailsForInvalidStrings()
+        {
+            Assert.False(Ulid.TryParse("1234", out _));
+            Assert.False(Ulid.TryParse(Guid.NewGuid().ToString(), out _));
+        }
     }
 }
