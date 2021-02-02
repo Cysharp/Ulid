@@ -26,13 +26,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ulid.Cli", "src\Ulid.Cli\Ul
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ulid.Cli.Tests", "tests\Ulid.Cli.Tests\Ulid.Cli.Tests.csproj", "{3488CD90-AAEA-442A-8E2E-0639497E037F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ulid.SystemTextJson", "src\Ulid.SystemTextJson\Ulid.SystemTextJson.csproj", "{66E152B2-4828-4770-BB24-A6FED7578CFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ulid.SystemTextJson", "src\Ulid.SystemTextJson\Ulid.SystemTextJson.csproj", "{66E152B2-4828-4770-BB24-A6FED7578CFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ulid.SystemTextJson.Tests", "tests\Ulid.SystemTextJson.Tests\Ulid.SystemTextJson.Tests.csproj", "{7A7716D3-2738-4C02-934B-9FFA86EFC01A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ulid.SystemTextJson.Tests", "tests\Ulid.SystemTextJson.Tests\Ulid.SystemTextJson.Tests.csproj", "{7A7716D3-2738-4C02-934B-9FFA86EFC01A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ulid.MessagePack", "src\Ulid.MessagePack\Ulid.MessagePack.csproj", "{BE35B408-0611-44C1-92B7-DF10DC178FF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ulid.MessagePack", "src\Ulid.MessagePack\Ulid.MessagePack.csproj", "{BE35B408-0611-44C1-92B7-DF10DC178FF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ulid.MessagePack.Tests", "tests\Ulid.MessagePack.Tests\Ulid.MessagePack.Tests.csproj", "{057D3071-FD7C-418A-8652-3A27F0E9A41E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ulid.MessagePack.Tests", "tests\Ulid.MessagePack.Tests\Ulid.MessagePack.Tests.csproj", "{057D3071-FD7C-418A-8652-3A27F0E9A41E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{3075C489-8B76-47CE-BA7F-C856FCC56DF1}"
 	ProjectSection(SolutionItems) = preProject
@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{3075C489-8
 		Directory.Build.props = Directory.Build.props
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorWasm", "sandbox\BlazorWasm\BlazorWasm.csproj", "{B49392BF-3988-48A0-A754-99647320AD61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,10 @@ Global
 		{057D3071-FD7C-418A-8652-3A27F0E9A41E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{057D3071-FD7C-418A-8652-3A27F0E9A41E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{057D3071-FD7C-418A-8652-3A27F0E9A41E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B49392BF-3988-48A0-A754-99647320AD61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B49392BF-3988-48A0-A754-99647320AD61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B49392BF-3988-48A0-A754-99647320AD61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B49392BF-3988-48A0-A754-99647320AD61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -102,6 +108,7 @@ Global
 		{7A7716D3-2738-4C02-934B-9FFA86EFC01A} = {8AB8257F-2CB1-4F78-9980-8E5A0F017F84}
 		{BE35B408-0611-44C1-92B7-DF10DC178FF3} = {A0803F51-FC43-4216-B067-41B516965BA0}
 		{057D3071-FD7C-418A-8652-3A27F0E9A41E} = {8AB8257F-2CB1-4F78-9980-8E5A0F017F84}
+		{B49392BF-3988-48A0-A754-99647320AD61} = {F1B5C8EA-DCBF-4A5F-819A-5E394F279AF9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E82BF37-8451-4819-BEF6-F9D9A2B48901}
