@@ -49,7 +49,7 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         static XorShift64 CreateXorShift64()
         {
-            using (var rng = new RNGCryptoServiceProvider())
+            using (var rng = RandomNumberGenerator.Create())
             {
                 // Span<byte> buffer = stackalloc byte[sizeof(UInt64)];
                 var buffer = new byte[sizeof(UInt64)];
