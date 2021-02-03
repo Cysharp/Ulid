@@ -18,6 +18,10 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       NUGET_XMLDOC_MODE: skip
     steps:
+      - name: Dump GitHub context
+        run: echo "$CONTEXT"
+        env:
+          CONTEXT: ${{ toJson(github) }}
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
