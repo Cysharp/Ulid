@@ -142,7 +142,7 @@ jobs:
 
   create-release:
     if: github.event.inputs.dry_run == 'false'
-    needs: [build-dotnet, build-unity]
+    needs: [update-packagejson, build-dotnet, build-unity]
     runs-on: ubuntu-latest
     env:
       GIT_TAG: ${{ github.event.inputs.tag }}
@@ -162,6 +162,7 @@ jobs:
         with:
           tag_name: ${{ env.GIT_TAG }}
           release_name: Ver.${{ env.GIT_TAG }}
+          commitish: ${{ needs.update-packagejson.outputs.sha }}
           draft: true
           prerelease: false
 
