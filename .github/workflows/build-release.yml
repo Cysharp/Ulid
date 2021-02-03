@@ -44,6 +44,9 @@ jobs:
         run: echo "SHA ${SHA}"
         env:
           SHA: ${{ steps.commit.outputs.sha }}
+      - name: tag
+        run: git tag ${{ env.GIT_TAG }}
+        if: env.DRY_RUN == 'false'
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
