@@ -1,7 +1,7 @@
 {
   "name": "com.cysharp.ulid",
   "displayName": "Ulid",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "unity": "2019.4",
   "description": "Fast .NET C# Implementation of ULID for .NET Core and Unity.",
   "keywords": [
