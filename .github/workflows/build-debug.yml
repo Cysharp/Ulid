@@ -51,7 +51,10 @@ jobs:
       # with linux-il2cpp. image from https://hub.docker.com/r/gableroux/unity3d/tags
       image: gableroux/unity3d:${{ matrix.unity }}-linux-il2cpp
     steps:
-      - run: apt update && apt install git -y
+      # Ubuntu 18.04 git is too old, use ppa latest git.
+      - run: |
+          apt-get update && apt-get install --no-install-recommends -y software-properties-common && add-apt-repository -y ppa:git-core/ppa
+          apt-get update && apt-get install --no-install-recommends -y git
       - uses: actions/checkout@v2
       - run: echo -n "$UNITY_LICENSE" >> .Unity.ulf
         env:
