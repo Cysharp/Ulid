@@ -19,13 +19,6 @@ jobs:
       NUGET_XMLDOC_MODE: skip
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 3.1.x
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 5.0.x
-
       # build CommandTools first (using dotnet run command in ZLogger.csproj)
       - run: dotnet build -c Debug src/Ulid
       - run: dotnet build -c Debug src/Ulid.Cli
