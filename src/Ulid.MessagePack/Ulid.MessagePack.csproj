@@ -9,6 +9,7 @@
         <!-- NuGet -->
         <PackageId>Ulid.MessagePack</PackageId>
         <Description>Ulid MessagePack Formatter.</Description>
+        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>

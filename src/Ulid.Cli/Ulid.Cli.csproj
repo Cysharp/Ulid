@@ -16,6 +16,7 @@
         <ToolCommandName>dotnet-ulid</ToolCommandName>
         <PackAsTool>true</PackAsTool>
         <LangVersion>7.3</LangVersion>
+        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
