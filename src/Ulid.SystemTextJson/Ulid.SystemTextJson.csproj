@@ -10,6 +10,7 @@
         <!-- NuGet -->
         <PackageId>Ulid.SystemTextJson</PackageId>
         <Description>Ulid System.Text.Json Converter.</Description>
+        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>

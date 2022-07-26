@@ -2,6 +2,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Ulid\Ulid.csproj" />
+        <IsPackable>true</IsPackable>
     </ItemGroup>
 
     <ItemGroup>
