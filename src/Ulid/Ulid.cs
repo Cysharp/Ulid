@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -74,6 +75,20 @@ namespace System // wa-o, System Namespace!?
         {
             get
             {
+                if (BitConverter.IsLittleEndian)
+                {
+                    // |A|B|C|D|E|F|G|H|... -> |F|E|D|C|B|A|0|0|
+
+                    // Lower |A|B|C|D| -> |D|C|B|A|
+                    // Upper |E|F| -> |F|E|
+                    // Time  |F|E| + |0|0|D|C|B|A|
+                    var lower = Unsafe.As<byte, uint>(ref Unsafe.AsRef(this.timestamp0));
+                    var upper = Unsafe.As<byte, ushort>(ref Unsafe.AsRef(this.timestamp4));
+                    var time = (long)BinaryPrimitives.ReverseEndianness(upper) + (((long)BinaryPrimitives.ReverseEndianness(lower)) << 16);
+
+                    return DateTimeOffset.FromUnixTimeMilliseconds(time);
+                }
+
                 Span<byte> buffer = stackalloc byte[8];
                 buffer[0] = timestamp5;
                 buffer[1] = timestamp4;
