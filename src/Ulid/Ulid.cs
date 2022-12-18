@@ -6,6 +6,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
+#if NETCOREAPP3_0_OR_GREATER
+using System.Runtime.Intrinsics.X86;
+using System.Runtime.Intrinsics;
+#endif
 
 namespace System // wa-o, System Namespace!?
 {
@@ -502,16 +506,48 @@ namespace System // wa-o, System Namespace!?
         /// <returns>The converted <c>Guid</c> value</returns>
         public Guid ToGuid()
         {
+#if NET7_0_OR_GREATER
+            if (Vector128.IsHardwareAccelerated && BitConverter.IsLittleEndian)
+            {
+                var vector = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                var shuffled = Vector128.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
+
+                return Unsafe.As<Vector128<byte>, Guid>(ref shuffled);
+            }
+#endif
+#if NETCOREAPP3_0_OR_GREATER
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
+            {
+                var vector = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                var shuffled = Ssse3.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
+
+                return Unsafe.As<Vector128<byte>, Guid>(ref shuffled);
+            }
+#endif
             Span<byte> buf = stackalloc byte[16];
             MemoryMarshal.Write(buf, ref this);
             if (BitConverter.IsLittleEndian)
             {
-                byte tmp;
-                tmp = buf[0]; buf[0] = buf[3]; buf[3] = tmp;
-                tmp = buf[1]; buf[1] = buf[2]; buf[2] = tmp;
-                tmp = buf[4]; buf[4] = buf[5]; buf[5] = tmp;
-                tmp = buf[6]; buf[6] = buf[7]; buf[7] = tmp;
+                // |A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
+                // |D|C|B|A|...
+                //      ...|F|E|H|G|...
+                //              ...|I|J|K|L|M|N|O|P|
+                ref var ptr = ref Unsafe.As<Ulid, uint>(ref this);
+                var lower = BinaryPrimitives.ReverseEndianness(ptr);
+                MemoryMarshal.Write(buf, ref lower);
+
+                ptr = ref Unsafe.Add(ref ptr, 1);
+                var upper = ((ptr & 0xFF_00_FF_00) << 8) | ((ptr & 0x00_FF_00_FF) >> 8);
+                MemoryMarshal.Write(buf.Slice(4), ref upper);
+
+                ref var upperBytes = ref Unsafe.As<uint, ulong>(ref Unsafe.Add(ref ptr, 1));
+                MemoryMarshal.Write(buf.Slice(8), ref upperBytes);
             }
+            else
+            {
+                MemoryMarshal.Write(buf, ref this);
+            }
+
             return MemoryMarshal.Read<Guid>(buf);
         }
     }
