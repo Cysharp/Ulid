@@ -426,45 +426,41 @@ namespace System // wa-o, System Namespace!?
         {
             ref int rA = ref Unsafe.As<Ulid, int>(ref Unsafe.AsRef(in this));
             return rA ^ Unsafe.Add(ref rA, 1) ^ Unsafe.Add(ref rA, 2) ^ Unsafe.Add(ref rA, 3);
-            }
         }
 
-        public unsafe bool Equals(Ulid other)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool EqualsCore(in Ulid left, in Ulid right)
         {
-            // readonly struct can not use Unsafe.As...
-            fixed (byte* a = &this.timestamp0)
+#if NET7_0_OR_GREATER
+            if (Vector128.IsHardwareAccelerated)
             {
-                byte* b = &other.timestamp0;
-
-                {
-                    var x = *(ulong*)a;
-                    var y = *(ulong*)b;
-                    if (x != y) return false;
-                }
-                {
-                    var x = *(ulong*)(a + 8);
-                    var y = *(ulong*)(b + 8);
-                    if (x != y) return false;
-                }
-
-                return true;
+                return Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in left)) == Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in right));
             }
+#endif
+#if NETCOREAPP3_0_OR_GREATER
+            if (Sse2.IsSupported)
+            {
+                var vA = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in left));
+                var vB = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in right));
+                var cmp = Sse2.CompareEqual(vA, vB);
+                return Sse2.MoveMask(cmp)== 0xFFFF;
+            }
+#endif
+
+            ref var rA = ref Unsafe.As<Ulid, long>(ref Unsafe.AsRef(in left));
+            ref var rB = ref Unsafe.As<Ulid, long>(ref Unsafe.AsRef(in right));
+
+            // Compare each element
+            return rA == rB && Unsafe.Add(ref rA, 1) == Unsafe.Add(ref rB, 1);
         }
 
-        public override bool Equals(object obj)
-        {
-            return (obj is Ulid other) ? this.Equals(other) : false;
-        }
+        public bool Equals(Ulid other) => EqualsCore(this, other);
 
-        public static bool operator ==(Ulid a, Ulid b)
-        {
-            return a.Equals(b);
-        }
+        public override bool Equals(object obj) => (obj is Ulid other) && EqualsCore(this, other);
 
-        public static bool operator !=(Ulid a, Ulid b)
-        {
-            return !a.Equals(b);
-        }
+        public static bool operator ==(Ulid a, Ulid b) => EqualsCore(a, b);
+
+        public static bool operator !=(Ulid a, Ulid b) => !EqualsCore(a, b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetResult(byte me, byte them) => me < them ? -1 : 1;
@@ -525,7 +521,6 @@ namespace System // wa-o, System Namespace!?
             }
 #endif
             Span<byte> buf = stackalloc byte[16];
-            MemoryMarshal.Write(buf, ref this);
             if (BitConverter.IsLittleEndian)
             {
                 // |A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
