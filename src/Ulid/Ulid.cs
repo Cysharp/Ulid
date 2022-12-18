@@ -418,13 +418,10 @@ namespace System // wa-o, System Namespace!?
 
         // Comparable/Equatable
 
-        public override unsafe int GetHashCode()
+        public override int GetHashCode()
         {
-            // Simply XOR, same algorithm of Guid.GetHashCode
-            fixed (void* p = &this.timestamp0)
-            {
-                var a = (int*)p;
-                return (*a) ^ *(a + 1) ^ *(a + 2) ^ *(a + 3);
+            ref int rA = ref Unsafe.As<Ulid, int>(ref Unsafe.AsRef(in this));
+            return rA ^ Unsafe.Add(ref rA, 1) ^ Unsafe.Add(ref rA, 2) ^ Unsafe.Add(ref rA, 3);
             }
         }
 
