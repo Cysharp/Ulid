@@ -202,16 +202,50 @@ namespace System // wa-o, System Namespace!?
         // source: https://github.com/dotnet/runtime/blob/4f9ae42d861fcb4be2fcd5d3d55d5f227d30e723/src/libraries/System.Private.CoreLib/src/System/Guid.cs
         public Ulid(Guid guid)
         {
+#if NET7_0_OR_GREATER
+            if (Vector128.IsHardwareAccelerated && BitConverter.IsLittleEndian)
+            {
+                var vector = Unsafe.As<Guid, Vector128<byte>>(ref guid);
+                var shuffled = Vector128.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
+
+                this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
+                return;
+            }
+#endif
+#if NETCOREAPP3_0_OR_GREATER
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
+            {
+                var vector = Unsafe.As<Guid, Vector128<byte>>(ref guid);
+                var shuffled = Ssse3.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
+
+                this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
+                return;
+            }
+#endif
             Span<byte> buf = stackalloc byte[16];
             MemoryMarshal.Write(buf, ref guid);
             if (BitConverter.IsLittleEndian)
             {
-                byte tmp;
-                tmp = buf[0]; buf[0] = buf[3]; buf[3] = tmp;
-                tmp = buf[1]; buf[1] = buf[2]; buf[2] = tmp;
-                tmp = buf[4]; buf[4] = buf[5]; buf[5] = tmp;
-                tmp = buf[6]; buf[6] = buf[7]; buf[7] = tmp;
+                // |A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
+                // |D|C|B|A|...
+                //      ...|F|E|H|G|...
+                //              ...|I|J|K|L|M|N|O|P|
+                ref var ptr = ref Unsafe.As<Guid, uint>(ref guid);
+                var lower = BinaryPrimitives.ReverseEndianness(ptr);
+                MemoryMarshal.Write(buf, ref lower);
+
+                ptr = ref Unsafe.Add(ref ptr, 1);
+                var upper = ((ptr & 0x00_FF_00_FF) << 8) | ((ptr & 0xFF_00_FF_00) >> 8);
+                MemoryMarshal.Write(buf.Slice(4), ref upper);
+
+                ref var upperBytes = ref Unsafe.As<uint, ulong>(ref Unsafe.Add(ref ptr, 1));
+                MemoryMarshal.Write(buf.Slice(8), ref upperBytes);
             }
+            else
+            {
+                MemoryMarshal.Write(buf, ref guid);
+            }
+
             this = MemoryMarshal.Read<Ulid>(buf);
         }
 
@@ -555,7 +589,7 @@ namespace System // wa-o, System Namespace!?
                 MemoryMarshal.Write(buf, ref lower);
 
                 ptr = ref Unsafe.Add(ref ptr, 1);
-                var upper = ((ptr & 0xFF_00_FF_00) << 8) | ((ptr & 0x00_FF_00_FF) >> 8);
+                var upper = ((ptr & 0x00_FF_00_FF) << 8) | ((ptr & 0xFF_00_FF_00) >> 8);
                 MemoryMarshal.Write(buf.Slice(4), ref upper);
 
                 ref var upperBytes = ref Unsafe.As<uint, ulong>(ref Unsafe.Add(ref ptr, 1));
