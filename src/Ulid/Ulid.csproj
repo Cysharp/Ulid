@@ -8,7 +8,7 @@
         <AssemblyOriginatorKeyFile>release.snk</AssemblyOriginatorKeyFile>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<LangVersion>Latest</LangVersion>
-
+		
         <!-- NuGet -->
         <PackageId>Ulid</PackageId>
         <Description>Fast .NET Standard(C#) Implementation of ULID.</Description>

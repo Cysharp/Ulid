@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 #if NETCOREAPP3_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics;
 #endif
@@ -23,7 +24,14 @@ namespace System // wa-o, System Namespace!?
 #if NETCOREAPP3_1_OR_GREATER
     [System.Text.Json.Serialization.JsonConverter(typeof(Cysharp.Serialization.Json.UlidJsonConverter))]
 #endif
-    public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
+    public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>, IComparable
+#if NET6_0_OR_GREATER
+, ISpanFormattable
+#endif
+#if NET7_0_OR_GREATER
+, ISpanParsable<Ulid>
+#endif
+       
     {
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
@@ -109,15 +117,26 @@ namespace System // wa-o, System Namespace!?
         internal Ulid(long timestampMilliseconds, XorShift64 random)
             : this()
         {
-            // Get memory in stack and copy to ulid(Little->Big reverse order).
-            ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            if (BitConverter.IsLittleEndian)
+            {
+                ref var ptr = ref Unsafe.As<long, uint>(ref timestampMilliseconds);
+                Unsafe.WriteUnaligned(ref timestamp2, BinaryPrimitives.ReverseEndianness(ptr));
 
+                var shortValue = Unsafe.As<uint, ushort>(ref Unsafe.Add(ref ptr, 1));
+                Unsafe.WriteUnaligned(ref timestamp0, BinaryPrimitives.ReverseEndianness(shortValue));
+            }
+            else
+            {
+                // Get memory in stack and copy to ulid(Little->Big reverse order).
+                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            }
+           
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
             Unsafe.WriteUnaligned(ref randomness2, random.Next()); // randomness2~9
@@ -126,13 +145,26 @@ namespace System // wa-o, System Namespace!?
         internal Ulid(long timestampMilliseconds, ReadOnlySpan<byte> randomness)
             : this()
         {
-            ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            if (BitConverter.IsLittleEndian)
+            {
+                ref var ptr = ref Unsafe.As<long, uint>(ref timestampMilliseconds);
+                Unsafe.WriteUnaligned(ref timestamp2, BinaryPrimitives.ReverseEndianness(ptr));
+
+                var shortValue = Unsafe.As<uint, ushort>(ref Unsafe.Add(ref ptr, 1));
+                Unsafe.WriteUnaligned(ref timestamp0, BinaryPrimitives.ReverseEndianness(shortValue));
+            }
+            else
+            {
+                // Get memory in stack and copy to ulid(Little->Big reverse order).
+                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            }
+
 
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
@@ -179,16 +211,49 @@ namespace System // wa-o, System Namespace!?
         // source: https://github.com/dotnet/runtime/blob/4f9ae42d861fcb4be2fcd5d3d55d5f227d30e723/src/libraries/System.Private.CoreLib/src/System/Guid.cs
         public Ulid(Guid guid)
         {
+#if NET7_0_OR_GREATER
+            if (Vector128.IsHardwareAccelerated && BitConverter.IsLittleEndian)
+            {
+                var vector = Unsafe.As<Guid, Vector128<byte>>(ref guid);
+                var shuffled = Vector128.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
+
+                this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
+                return;
+            }
+#endif
+#if NETCOREAPP3_0_OR_GREATER
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
+            {
+                var vector = Unsafe.As<Guid, Vector128<byte>>(ref guid);
+                var shuffled = Ssse3.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
+
+                this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
+                return;
+            }
+#endif
             Span<byte> buf = stackalloc byte[16];
-            MemoryMarshal.Write(buf, ref guid);
             if (BitConverter.IsLittleEndian)
             {
-                byte tmp;
-                tmp = buf[0]; buf[0] = buf[3]; buf[3] = tmp;
-                tmp = buf[1]; buf[1] = buf[2]; buf[2] = tmp;
-                tmp = buf[4]; buf[4] = buf[5]; buf[5] = tmp;
-                tmp = buf[6]; buf[6] = buf[7]; buf[7] = tmp;
+                // |A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
+                // |D|C|B|A|...
+                //      ...|F|E|H|G|...
+                //              ...|I|J|K|L|M|N|O|P|
+                ref var ptr = ref Unsafe.As<Guid, uint>(ref guid);
+                var lower = BinaryPrimitives.ReverseEndianness(ptr);
+                MemoryMarshal.Write(buf, ref lower);
+
+                ptr = ref Unsafe.Add(ref ptr, 1);
+                var upper = ((ptr & 0x00_FF_00_FF) << 8) | ((ptr & 0xFF_00_FF_00) >> 8);
+                MemoryMarshal.Write(buf.Slice(4), ref upper);
+
+                ref var upperBytes = ref Unsafe.As<uint, ulong>(ref Unsafe.Add(ref ptr, 1));
+                MemoryMarshal.Write(buf.Slice(8), ref upperBytes);
             }
+            else
+            {
+                MemoryMarshal.Write(buf, ref guid);
+            }
+
             this = MemoryMarshal.Read<Ulid>(buf);
         }
 
@@ -420,6 +485,51 @@ namespace System // wa-o, System Namespace!?
             }
         }
 
+#if NET6_0_OR_GREATER
+        //
+        //ISpanFormattable
+        //
+#nullable enable
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
+        {
+            if (TryWriteStringify(destination))
+            {
+                charsWritten = 26;
+                return true;
+            }
+            else
+            {
+                charsWritten = 0;
+                return false;
+            }
+        }
+
+        public string ToString(string? format, IFormatProvider? formatProvider) => ToString();
+#nullable disable
+#endif
+#if NET7_0_OR_GREATER
+        //
+        // IParsable
+        //
+#nullable enable
+        /// <inheritdoc cref="IParsable{TSelf}.Parse(string, IFormatProvider?)" />
+        public static Ulid Parse(string s, IFormatProvider? provider) => Parse(s);
+
+        /// <inheritdoc cref="IParsable{TSelf}.TryParse(string?, IFormatProvider?, out TSelf)" />
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Ulid result) => TryParse(s, out result);
+
+        //
+        // ISpanParsable
+        //
+
+        /// <inheritdoc cref="ISpanParsable{TSelf}.Parse(ReadOnlySpan{char}, IFormatProvider?)" />
+        public static Ulid Parse(ReadOnlySpan<char> s, IFormatProvider? provider) => Parse(s);
+
+        /// <inheritdoc cref="ISpanParsable{TSelf}.TryParse(ReadOnlySpan{char}, IFormatProvider?, out TSelf)" />
+        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, [MaybeNullWhen(false)] out Ulid result) => TryParse(s, out result);
+#nullable disable
+#endif
+
         // Comparable/Equatable
 
         public override int GetHashCode()
@@ -488,6 +598,24 @@ namespace System // wa-o, System Namespace!?
             return 0;
         }
 
+#nullable enable
+        public int CompareTo(object? value)
+        {
+            if (value == null)
+            {
+                return 1;
+            }
+
+            if (value is not Ulid ulid)
+            {
+                throw new ArgumentException("Object must be of type ULID.", nameof(value));
+            }
+
+            return this.CompareTo(ulid);
+        }
+
+#nullable disable
+
         public static explicit operator Guid(Ulid _this)
         {
             return _this.ToGuid();
@@ -532,7 +660,7 @@ namespace System // wa-o, System Namespace!?
                 MemoryMarshal.Write(buf, ref lower);
 
                 ptr = ref Unsafe.Add(ref ptr, 1);
-                var upper = ((ptr & 0xFF_00_FF_00) << 8) | ((ptr & 0x00_FF_00_FF) >> 8);
+                var upper = ((ptr & 0x00_FF_00_FF) << 8) | ((ptr & 0xFF_00_FF_00) >> 8);
                 MemoryMarshal.Write(buf.Slice(4), ref upper);
 
                 ref var upperBytes = ref Unsafe.As<uint, ulong>(ref Unsafe.Add(ref ptr, 1));
