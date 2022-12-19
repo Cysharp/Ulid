@@ -65,6 +65,7 @@ namespace UlidTests
                 Ulid.Parse(nulid.ToString()).ToByteArray().Should().BeEquivalentTo(nulid.ToByteArray());
             }
         }
+
         [Fact]
         public void Randomness()
         {
@@ -84,6 +85,22 @@ namespace UlidTests
             var ulid2 = new Ulid(guid);
 
             ulid2.Should().BeEquivalentTo(ulid, "a Ulid-Guid roundtrip should result in identical values");
+        }
+
+        [Fact]
+        public void UlidCompareTo()
+        {
+            var largeUlid = Ulid.MaxValue;
+            var smallUlid = Ulid.MinValue;
+
+            largeUlid.CompareTo(smallUlid).Should().Be(1);
+            smallUlid.CompareTo(largeUlid).Should().Be(-1);
+            smallUlid.CompareTo(smallUlid).Should().Be(0);
+
+            object smallObject = (object)smallUlid;
+            largeUlid.CompareTo(smallUlid).Should().Be(1);
+            largeUlid.CompareTo(null).Should().Be(1);
+            largeUlid.Invoking(u=> u.CompareTo("")).Should().Throw<ArgumentException>();
         }
 
         [Fact]

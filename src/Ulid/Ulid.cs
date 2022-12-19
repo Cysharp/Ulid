@@ -23,7 +23,7 @@ namespace System // wa-o, System Namespace!?
 #if NETCOREAPP3_1_OR_GREATER
     [System.Text.Json.Serialization.JsonConverter(typeof(Cysharp.Serialization.Json.UlidJsonConverter))]
 #endif
-    public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>
+    public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>, IComparable
     {
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
@@ -544,6 +544,24 @@ namespace System // wa-o, System Namespace!?
 
             return 0;
         }
+
+#nullable enable
+        public int CompareTo(object? value)
+        {
+            if (value == null)
+            {
+                return 1;
+            }
+
+            if (value is not Ulid ulid)
+            {
+                throw new ArgumentException("Object must be of type ULID.", nameof(value));
+            }
+
+            return this.CompareTo(ulid);
+        }
+
+#nullable disable
 
         public static explicit operator Guid(Ulid _this)
         {
