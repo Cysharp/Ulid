@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 #if NETCOREAPP3_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics;
 #endif
@@ -24,6 +25,13 @@ namespace System // wa-o, System Namespace!?
     [System.Text.Json.Serialization.JsonConverter(typeof(Cysharp.Serialization.Json.UlidJsonConverter))]
 #endif
     public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>, IComparable
+#if NET6_0_OR_GREATER
+, ISpanFormattable
+#endif
+#if NET7_0_OR_GREATER
+, ISpanParsable<Ulid>
+#endif
+       
     {
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
@@ -119,16 +127,16 @@ namespace System // wa-o, System Namespace!?
             }
             else
             {
-            // Get memory in stack and copy to ulid(Little->Big reverse order).
-            ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+                // Get memory in stack and copy to ulid(Little->Big reverse order).
+                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
             }
-
+           
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
             Unsafe.WriteUnaligned(ref randomness2, random.Next()); // randomness2~9
@@ -148,13 +156,13 @@ namespace System // wa-o, System Namespace!?
             else
             {
                 // Get memory in stack and copy to ulid(Little->Big reverse order).
-            ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
             }
 
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
@@ -223,7 +231,6 @@ namespace System // wa-o, System Namespace!?
             }
 #endif
             Span<byte> buf = stackalloc byte[16];
-            MemoryMarshal.Write(buf, ref guid);
             if (BitConverter.IsLittleEndian)
             {
                 // |A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
@@ -476,6 +483,51 @@ namespace System // wa-o, System Namespace!?
                 return new string((char*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)), 0, 26);
             }
         }
+
+#if NET6_0_OR_GREATER
+        //
+        //ISpanFormattable
+        //
+#nullable enable
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
+        {
+            if (TryWriteStringify(destination))
+            {
+                charsWritten = 26;
+                return true;
+            }
+            else
+            {
+                charsWritten = 0;
+                return false;
+            }
+        }
+
+        public string ToString(string? format, IFormatProvider? formatProvider) => ToString();
+#nullable disable
+#endif
+#if NET7_0_OR_GREATER
+        //
+        // IParsable
+        //
+#nullable enable
+        /// <inheritdoc cref="IParsable{TSelf}.Parse(string, IFormatProvider?)" />
+        public static Ulid Parse(string s, IFormatProvider? provider) => Parse(s);
+
+        /// <inheritdoc cref="IParsable{TSelf}.TryParse(string?, IFormatProvider?, out TSelf)" />
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Ulid result) => TryParse(s, out result);
+
+        //
+        // ISpanParsable
+        //
+
+        /// <inheritdoc cref="ISpanParsable{TSelf}.Parse(ReadOnlySpan{char}, IFormatProvider?)" />
+        public static Ulid Parse(ReadOnlySpan<char> s, IFormatProvider? provider) => Parse(s);
+
+        /// <inheritdoc cref="ISpanParsable{TSelf}.TryParse(ReadOnlySpan{char}, IFormatProvider?, out TSelf)" />
+        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, [MaybeNullWhen(false)] out Ulid result) => TryParse(s, out result);
+#nullable disable
+#endif
 
         // Comparable/Equatable
 
