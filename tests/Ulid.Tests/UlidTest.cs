@@ -126,10 +126,70 @@ namespace UlidTests
         }
 
         [Fact]
-        void UlidTryParseFailsForInvalidStrings()
+        public void UlidTryParseFailsForInvalidStrings()
         {
             Assert.False(Ulid.TryParse("1234", out _));
             Assert.False(Ulid.TryParse(Guid.NewGuid().ToString(), out _));
         }
+
+#if NET6_0_OR_GREATER
+        [Fact]
+        public void UlidTryFormatReturnsStringAndLength()
+        {
+            var asString = "01ARZ3NDEKTSV4RRFFQ69G5FAV";
+            var ulid = Ulid.Parse(asString);
+            var destination = new char[26];
+            var largeDestination = new char[27];
+
+            ulid.TryFormat(destination, out int length, default, null).Should().BeTrue();
+            destination.Should().BeEquivalentTo(asString);
+            length.Should().Be(26);
+
+            ulid.TryFormat(largeDestination, out int largeLength, default, null).Should().BeTrue();
+            largeDestination.AsSpan().Slice(0,26).ToArray().Should().BeEquivalentTo(asString);
+            largeLength.Should().Be(26);
+        }
+        
+        [Fact]
+        public void UlidTryFormatReturnsFalseWhenInvalidDestination()
+        {
+            var asString = "01ARZ3NDEKTSV4RRFFQ69G5FAV";
+            var ulid = Ulid.Parse(asString);
+            var formatted = new char[25];
+
+            ulid.TryFormat(formatted, out int length, default, null).Should().BeFalse();
+            formatted.Should().BeEquivalentTo(new char[25]);
+            length.Should().Be(0);
+        }
+#endif
+#if NET7_0_OR_GREATER
+
+        [Fact]
+        public void IParsable()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                var nulid = NUlid.Ulid.NewUlid();
+                Ulid.Parse(nulid.ToString(),null).ToByteArray().Should().BeEquivalentTo(nulid.ToByteArray());
+
+                Ulid.TryParse(nulid.ToString(), null, out Ulid ulid).Should().BeTrue();
+                ulid.ToByteArray().Should().BeEquivalentTo(nulid.ToByteArray());
+            }
+        }
+
+        [Fact]
+        public void ISpanParsable()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                var nulid = NUlid.Ulid.NewUlid();
+                Ulid.Parse(nulid.ToString().AsSpan(), null).ToByteArray().Should().BeEquivalentTo(nulid.ToByteArray());
+
+                Ulid.TryParse(nulid.ToString().AsSpan(), null, out Ulid ulid).Should().BeTrue();
+                ulid.ToByteArray().Should().BeEquivalentTo(nulid.ToByteArray());
+            }
+        }
+#endif
+
     }
 }
