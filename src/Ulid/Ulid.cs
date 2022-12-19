@@ -109,6 +109,16 @@ namespace System // wa-o, System Namespace!?
         internal Ulid(long timestampMilliseconds, XorShift64 random)
             : this()
         {
+            if (BitConverter.IsLittleEndian)
+            {
+                ref var ptr = ref Unsafe.As<long, uint>(ref timestampMilliseconds);
+                Unsafe.WriteUnaligned(ref timestamp2, BinaryPrimitives.ReverseEndianness(ptr));
+
+                var shortValue = Unsafe.As<uint, ushort>(ref Unsafe.Add(ref ptr, 1));
+                Unsafe.WriteUnaligned(ref timestamp0, BinaryPrimitives.ReverseEndianness(shortValue));
+            }
+            else
+            {
             // Get memory in stack and copy to ulid(Little->Big reverse order).
             ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
             this.timestamp0 = Unsafe.Add(ref firstByte, 5);
@@ -117,6 +127,7 @@ namespace System // wa-o, System Namespace!?
             this.timestamp3 = Unsafe.Add(ref firstByte, 2);
             this.timestamp4 = Unsafe.Add(ref firstByte, 1);
             this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            }
 
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
@@ -126,6 +137,17 @@ namespace System // wa-o, System Namespace!?
         internal Ulid(long timestampMilliseconds, ReadOnlySpan<byte> randomness)
             : this()
         {
+            if (BitConverter.IsLittleEndian)
+            {
+                ref var ptr = ref Unsafe.As<long, uint>(ref timestampMilliseconds);
+                Unsafe.WriteUnaligned(ref timestamp2, BinaryPrimitives.ReverseEndianness(ptr));
+
+                var shortValue = Unsafe.As<uint, ushort>(ref Unsafe.Add(ref ptr, 1));
+                Unsafe.WriteUnaligned(ref timestamp0, BinaryPrimitives.ReverseEndianness(shortValue));
+            }
+            else
+            {
+                // Get memory in stack and copy to ulid(Little->Big reverse order).
             ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
             this.timestamp0 = Unsafe.Add(ref firstByte, 5);
             this.timestamp1 = Unsafe.Add(ref firstByte, 4);
@@ -133,6 +155,7 @@ namespace System // wa-o, System Namespace!?
             this.timestamp3 = Unsafe.Add(ref firstByte, 2);
             this.timestamp4 = Unsafe.Add(ref firstByte, 1);
             this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            }
 
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
