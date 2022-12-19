@@ -49,6 +49,14 @@ namespace UlidTests
         }
 
         [Fact]
+        public void HashCode()
+        {
+            var ulid = Ulid.Parse("01ARZ3NDEKTSV4RRFFQ69G5FAV");
+
+            Assert.Equal(-1363483029, ulid.GetHashCode());
+        }
+
+        [Fact]
         public void Parse()
         {
             for (int i = 0; i < 100; i++)
