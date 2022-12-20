@@ -476,12 +476,19 @@ namespace System // wa-o, System Namespace!?
 
         public override string ToString()
         {
+#if NETCOREAPP2_1_OR_GREATER
+            return string.Create<Ulid>(26, this, (span, state) =>
+            {
+                state.TryWriteStringify(span);
+            });
+#else
             Span<char> span = stackalloc char[26];
             TryWriteStringify(span);
             unsafe
             {
                 return new string((char*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)), 0, 26);
             }
+#endif
         }
 
 #if NET6_0_OR_GREATER
@@ -506,6 +513,7 @@ namespace System // wa-o, System Namespace!?
         public string ToString(string? format, IFormatProvider? formatProvider) => ToString();
 #nullable disable
 #endif
+
 #if NET7_0_OR_GREATER
         //
         // IParsable
@@ -515,7 +523,7 @@ namespace System // wa-o, System Namespace!?
         public static Ulid Parse(string s, IFormatProvider? provider) => Parse(s);
 
         /// <inheritdoc cref="IParsable{TSelf}.TryParse(string?, IFormatProvider?, out TSelf)" />
-        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Ulid result) => TryParse(s, out result);
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Ulid result) => TryParse(s, out result);
 
         //
         // ISpanParsable
@@ -525,7 +533,7 @@ namespace System // wa-o, System Namespace!?
         public static Ulid Parse(ReadOnlySpan<char> s, IFormatProvider? provider) => Parse(s);
 
         /// <inheritdoc cref="ISpanParsable{TSelf}.TryParse(ReadOnlySpan{char}, IFormatProvider?, out TSelf)" />
-        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, [MaybeNullWhen(false)] out Ulid result) => TryParse(s, out result);
+        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Ulid result) => TryParse(s, out result);
 #nullable disable
 #endif
 
@@ -572,7 +580,7 @@ namespace System // wa-o, System Namespace!?
         public static bool operator !=(Ulid a, Ulid b) => !EqualsCore(a, b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int GetResult(byte me, byte them) => me < them ? -1 : 1;
+        private static int GetResult(byte me, byte them) => me < them ? -1 : 1;
 
         public int CompareTo(Ulid other)
         {

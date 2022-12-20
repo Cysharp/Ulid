@@ -165,7 +165,6 @@ namespace System // wa-o, System Namespace!?
                 this.timestamp5 = Unsafe.Add(ref firstByte, 0);
             }
 
-
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
             randomness1 = randomness[1];
@@ -477,6 +476,12 @@ namespace System // wa-o, System Namespace!?
 
         public override string ToString()
         {
+#if NETCOREAPP2_1_OR_GREATER
+            return string.Create<Ulid>(26, this, (span, state) =>
+            {
+                state.TryWriteStringify(span);
+            });
+#endif
             Span<char> span = stackalloc char[26];
             TryWriteStringify(span);
             unsafe
@@ -516,7 +521,7 @@ namespace System // wa-o, System Namespace!?
         public static Ulid Parse(string s, IFormatProvider? provider) => Parse(s);
 
         /// <inheritdoc cref="IParsable{TSelf}.TryParse(string?, IFormatProvider?, out TSelf)" />
-        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Ulid result) => TryParse(s, out result);
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Ulid result) => TryParse(s, out result);
 
         //
         // ISpanParsable
@@ -526,7 +531,7 @@ namespace System // wa-o, System Namespace!?
         public static Ulid Parse(ReadOnlySpan<char> s, IFormatProvider? provider) => Parse(s);
 
         /// <inheritdoc cref="ISpanParsable{TSelf}.TryParse(ReadOnlySpan{char}, IFormatProvider?, out TSelf)" />
-        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, [MaybeNullWhen(false)] out Ulid result) => TryParse(s, out result);
+        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Ulid result) => TryParse(s, out result);
 #nullable disable
 #endif
 
@@ -573,7 +578,7 @@ namespace System // wa-o, System Namespace!?
         public static bool operator !=(Ulid a, Ulid b) => !EqualsCore(a, b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int GetResult(byte me, byte them) => me < them ? -1 : 1;
+        private static int GetResult(byte me, byte them) => me < them ? -1 : 1;
 
         public int CompareTo(Ulid other)
         {
