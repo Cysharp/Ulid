@@ -117,25 +117,14 @@ namespace System // wa-o, System Namespace!?
         internal Ulid(long timestampMilliseconds, XorShift64 random)
             : this()
         {
-            if (BitConverter.IsLittleEndian)
-            {
-                ref var ptr = ref Unsafe.As<long, uint>(ref timestampMilliseconds);
-                Unsafe.WriteUnaligned(ref timestamp2, BinaryPrimitives.ReverseEndianness(ptr));
-
-                var shortValue = Unsafe.As<uint, ushort>(ref Unsafe.Add(ref ptr, 1));
-                Unsafe.WriteUnaligned(ref timestamp0, BinaryPrimitives.ReverseEndianness(shortValue));
-            }
-            else
-            {
-                // Get memory in stack and copy to ulid(Little->Big reverse order).
-                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
-            }
+            // Get memory in stack and copy to ulid(Little->Big reverse order).
+            ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
            
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
@@ -145,25 +134,14 @@ namespace System // wa-o, System Namespace!?
         internal Ulid(long timestampMilliseconds, ReadOnlySpan<byte> randomness)
             : this()
         {
-            if (BitConverter.IsLittleEndian)
-            {
-                ref var ptr = ref Unsafe.As<long, uint>(ref timestampMilliseconds);
-                Unsafe.WriteUnaligned(ref timestamp2, BinaryPrimitives.ReverseEndianness(ptr));
-
-                var shortValue = Unsafe.As<uint, ushort>(ref Unsafe.Add(ref ptr, 1));
-                Unsafe.WriteUnaligned(ref timestamp0, BinaryPrimitives.ReverseEndianness(shortValue));
-            }
-            else
-            {
-                // Get memory in stack and copy to ulid(Little->Big reverse order).
-                ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
-            }
+            // Get memory in stack and copy to ulid(Little->Big reverse order).
+            ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
+            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
 
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
@@ -205,6 +183,10 @@ namespace System // wa-o, System Namespace!?
             randomness8 = (byte)((CharToBase32[base32[22]] << 7) | (CharToBase32[base32[23]] << 2) | (CharToBase32[base32[24]] >> 3));
         }
 
+#if NETCOREAPP3_0_OR_GREATER
+        private static readonly Vector128<byte> guidVecShuffle = Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15);
+#endif
+
         // HACK: We assume the layout of a Guid is the following:
         // Int32, Int16, Int16, Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8
         // source: https://github.com/dotnet/runtime/blob/4f9ae42d861fcb4be2fcd5d3d55d5f227d30e723/src/libraries/System.Private.CoreLib/src/System/Guid.cs
@@ -224,7 +206,7 @@ namespace System // wa-o, System Namespace!?
             if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
             {
                 var vector = Unsafe.As<Guid, Vector128<byte>>(ref guid);
-                var shuffled = Ssse3.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
+                var shuffled = Ssse3.Shuffle(vector, guidVecShuffle);
 
                 this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
                 return;
@@ -560,7 +542,7 @@ namespace System // wa-o, System Namespace!?
                 var vA = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in left));
                 var vB = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in right));
                 var cmp = Sse2.CompareEqual(vA, vB);
-                return Sse2.MoveMask(cmp)== 0xFFFF;
+                return Sse2.MoveMask(cmp) == 0xFFFF;
             }
 #endif
 
@@ -641,7 +623,7 @@ namespace System // wa-o, System Namespace!?
             if (Vector128.IsHardwareAccelerated && BitConverter.IsLittleEndian)
             {
                 var vector = Unsafe.As<Ulid, Vector128<byte>>(ref this);
-                var shuffled = Vector128.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
+                var shuffled = Vector128.Shuffle(vector, guidVecShuffle);
 
                 return Unsafe.As<Vector128<byte>, Guid>(ref shuffled);
             }
