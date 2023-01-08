@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
-#if NETCOREAPP3_0_OR_GREATER
+#if NET6_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics;
@@ -183,30 +183,16 @@ namespace System // wa-o, System Namespace!?
             randomness8 = (byte)((CharToBase32[base32[22]] << 7) | (CharToBase32[base32[23]] << 2) | (CharToBase32[base32[24]] >> 3));
         }
 
-#if NETCOREAPP3_0_OR_GREATER
-        private static readonly Vector128<byte> guidVecShuffle = Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15);
-#endif
-
         // HACK: We assume the layout of a Guid is the following:
         // Int32, Int16, Int16, Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8
         // source: https://github.com/dotnet/runtime/blob/4f9ae42d861fcb4be2fcd5d3d55d5f227d30e723/src/libraries/System.Private.CoreLib/src/System/Guid.cs
         public Ulid(Guid guid)
         {
-#if NET7_0_OR_GREATER
-            if (Vector128.IsHardwareAccelerated && BitConverter.IsLittleEndian)
+#if NET6_0_OR_GREATER
+            if (IsVector128Supported && BitConverter.IsLittleEndian)
             {
                 var vector = Unsafe.As<Guid, Vector128<byte>>(ref guid);
-                var shuffled = Vector128.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
-
-                this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
-                return;
-            }
-#endif
-#if NETCOREAPP3_0_OR_GREATER
-            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
-            {
-                var vector = Unsafe.As<Guid, Vector128<byte>>(ref guid);
-                var shuffled = Ssse3.Shuffle(vector, guidVecShuffle);
+                var shuffled = Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
 
                 this = Unsafe.As<Vector128<byte>, Ulid>(ref shuffled);
                 return;
@@ -536,7 +522,7 @@ namespace System // wa-o, System Namespace!?
                 return Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in left)) == Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in right));
             }
 #endif
-#if NETCOREAPP3_0_OR_GREATER
+#if NET6_0_OR_GREATER
             if (Sse2.IsSupported)
             {
                 var vA = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in left));
@@ -619,20 +605,11 @@ namespace System // wa-o, System Namespace!?
         /// <returns>The converted <c>Guid</c> value</returns>
         public Guid ToGuid()
         {
-#if NET7_0_OR_GREATER
-            if (Vector128.IsHardwareAccelerated && BitConverter.IsLittleEndian)
+#if NET6_0_OR_GREATER
+            if (IsVector128Supported && BitConverter.IsLittleEndian)
             {
                 var vector = Unsafe.As<Ulid, Vector128<byte>>(ref this);
-                var shuffled = Vector128.Shuffle(vector, guidVecShuffle);
-
-                return Unsafe.As<Vector128<byte>, Guid>(ref shuffled);
-            }
-#endif
-#if NETCOREAPP3_0_OR_GREATER
-            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
-            {
-                var vector = Unsafe.As<Ulid, Vector128<byte>>(ref this);
-                var shuffled = Ssse3.Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
+                var shuffled = Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
 
                 return Unsafe.As<Vector128<byte>, Guid>(ref shuffled);
             }
@@ -662,5 +639,36 @@ namespace System // wa-o, System Namespace!?
 
             return MemoryMarshal.Read<Guid>(buf);
         }
-    }
+
+#if NET6_0_OR_GREATER
+        private static bool IsVector128Supported 
+        {
+            get 
+            {
+#if NET7_0_OR_GREATER
+                return Vector128.IsHardwareAccelerated;
+#endif
+                return Sse3.IsSupported;
+            } 
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector128<byte> Shuffle(Vector128<byte> value, Vector128<byte> mask)
+        {
+            Debug.Assert(BitConverter.IsLittleEndian);
+            Debug.Assert(IsVector128Supported);
+
+#if NET7_0_OR_GREATER
+            if (Vector128.IsHardwareAccelerated)
+            {
+                return Vector128.Shuffle(value, mask);
+            }
+#endif
+            if (Ssse3.IsSupported)
+            {
+                return Ssse3.Shuffle(value, mask);
+            }
+            throw new NotImplementedException();
+        }
+#endif
+            }
 }
