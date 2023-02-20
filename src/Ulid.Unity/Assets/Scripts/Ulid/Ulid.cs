@@ -34,7 +34,7 @@ namespace System // wa-o, System Namespace!?
 
         // Core
 
-        // Timestamp(64bits)
+        // Timestamp(48bits)
         [FieldOffset(0)] readonly byte timestamp0;
         [FieldOffset(1)] readonly byte timestamp1;
         [FieldOffset(2)] readonly byte timestamp2;
