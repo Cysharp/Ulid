@@ -113,6 +113,7 @@ namespace UlidTests
             var ulid = Ulid.Parse("01H5M9J9BM30QWKHQGPY01AHPC");
             var inverseUlid = Ulid.Parse("7YETBPDPMBWZ83CE8F91ZYNE9K");
 
+            ulid.Should().BeEquivalentTo(inverseUlid.Inverse());
             inverseUlid.Should().BeEquivalentTo(ulid.Inverse());
         }
     }
