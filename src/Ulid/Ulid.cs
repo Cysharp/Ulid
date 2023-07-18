@@ -281,6 +281,32 @@ namespace System // wa-o, System Namespace!?
             return ulid;
         }
 
+        // Inverse 
+        public Ulid Inverse()
+        {
+            byte[] invertedBytes = new byte[16];
+
+            invertedBytes[0] = (byte)~this.timestamp0;
+            invertedBytes[1] = (byte)~this.timestamp1;
+            invertedBytes[2] = (byte)~this.timestamp2;
+            invertedBytes[3] = (byte)~this.timestamp3;
+            invertedBytes[4] = (byte)~this.timestamp4;
+            invertedBytes[5] = (byte)~this.timestamp5;
+
+            invertedBytes[6] = (byte)~this.randomness0;
+            invertedBytes[7] = (byte)~this.randomness1;
+            invertedBytes[8] = (byte)~this.randomness2;
+            invertedBytes[9] = (byte)~this.randomness3;
+            invertedBytes[10] = (byte)~this.randomness4;
+            invertedBytes[11] = (byte)~this.randomness5;
+            invertedBytes[12] = (byte)~this.randomness6;
+            invertedBytes[13] = (byte)~this.randomness7;
+            invertedBytes[14] = (byte)~this.randomness8;
+            invertedBytes[15] = (byte)~this.randomness9;
+
+            return new Ulid(invertedBytes);
+        }
+
         // Convert
 
         public byte[] ToByteArray()

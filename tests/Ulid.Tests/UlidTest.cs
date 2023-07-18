@@ -106,5 +106,14 @@ namespace UlidTests
             Assert.False(Ulid.TryParse("1234", out _));
             Assert.False(Ulid.TryParse(Guid.NewGuid().ToString(), out _));
         }
+
+        [Fact]
+        void UlidInverse()
+        {
+            var ulid = Ulid.Parse("01H5M9J9BM30QWKHQGPY01AHPC");
+            var inverseUlid = Ulid.Parse("7YETBPDPMBWZ83CE8F91ZYNE9K");
+
+            inverseUlid.Should().BeEquivalentTo(ulid.Inverse());
+        }
     }
 }
