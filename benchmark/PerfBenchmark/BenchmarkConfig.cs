@@ -15,7 +15,7 @@ namespace PerfBenchmark
             var baseConfig = Job.ShortRun.WithIterationCount(1).WithWarmupCount(1);
 
             // Add(baseConfig.With(Runtime.Clr).With(Jit.RyuJit).With(Platform.X64));
-            Add(baseConfig.With(Runtime.Core).With(Jit.RyuJit).With(Platform.X64));
+            Add(baseConfig.With(Jit.RyuJit).With(Platform.X64));
 
             Add(MarkdownExporter.GitHub);
             Add(CsvExporter.Default);
