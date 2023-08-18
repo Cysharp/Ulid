@@ -463,8 +463,7 @@ namespace System // wa-o, System Namespace!?
         //
         //ISpanFormattable
         //
-#nullable enable
-        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider)
         {
             if (TryWriteStringify(destination))
             {
@@ -478,31 +477,28 @@ namespace System // wa-o, System Namespace!?
             }
         }
 
-        public string ToString(string? format, IFormatProvider? formatProvider) => ToString();
-#nullable disable
+        public string ToString(string format, IFormatProvider formatProvider) => ToString();
 #endif
 
 #if NET7_0_OR_GREATER
         //
         // IParsable
         //
-#nullable enable
         /// <inheritdoc cref="IParsable{TSelf}.Parse(string, IFormatProvider?)" />
-        public static Ulid Parse(string s, IFormatProvider? provider) => Parse(s);
+        public static Ulid Parse(string s, IFormatProvider provider) => Parse(s);
 
         /// <inheritdoc cref="IParsable{TSelf}.TryParse(string?, IFormatProvider?, out TSelf)" />
-        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Ulid result) => TryParse(s, out result);
+        public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, out Ulid result) => TryParse(s, out result);
 
         //
         // ISpanParsable
         //
 
         /// <inheritdoc cref="ISpanParsable{TSelf}.Parse(ReadOnlySpan{char}, IFormatProvider?)" />
-        public static Ulid Parse(ReadOnlySpan<char> s, IFormatProvider? provider) => Parse(s);
+        public static Ulid Parse(ReadOnlySpan<char> s, IFormatProvider provider) => Parse(s);
 
         /// <inheritdoc cref="ISpanParsable{TSelf}.TryParse(ReadOnlySpan{char}, IFormatProvider?, out TSelf)" />
-        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Ulid result) => TryParse(s, out result);
-#nullable disable
+        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider provider, out Ulid result) => TryParse(s, out result);
 #endif
 
         // Comparable/Equatable
@@ -573,23 +569,19 @@ namespace System // wa-o, System Namespace!?
             return 0;
         }
 
-#nullable enable
-        public int CompareTo(object? value)
+        public int CompareTo(object value)
         {
             if (value == null)
             {
                 return 1;
             }
 
-            if (value is not Ulid ulid)
+            if (value is Ulid ulid)
             {
-                throw new ArgumentException("Object must be of type ULID.", nameof(value));
+                return this.CompareTo(ulid);
             }
-
-            return this.CompareTo(ulid);
+            throw new ArgumentException("Object must be of type ULID.", nameof(value));
         }
-
-#nullable disable
 
         public static explicit operator Guid(Ulid _this)
         {
