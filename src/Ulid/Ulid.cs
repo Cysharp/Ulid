@@ -24,7 +24,7 @@ namespace System // wa-o, System Namespace!?
 #if NETCOREAPP3_1_OR_GREATER
     [System.Text.Json.Serialization.JsonConverter(typeof(Cysharp.Serialization.Json.UlidJsonConverter))]
 #endif
-    public partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>, IComparable
+    public readonly partial struct Ulid : IEquatable<Ulid>, IComparable<Ulid>, IComparable
 #if NET6_0_OR_GREATER
 , ISpanFormattable
 #endif
@@ -600,7 +600,7 @@ namespace System // wa-o, System Namespace!?
 #if NET6_0_OR_GREATER
             if (IsVector128Supported && BitConverter.IsLittleEndian)
             {
-                var vector = Unsafe.As<Ulid, Vector128<byte>>(ref this);
+                var vector = Unsafe.As<Ulid, Vector128<byte>>(ref Unsafe.AsRef(in this));
                 var shuffled = Shuffle(vector, Vector128.Create((byte)3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15));
 
                 return Unsafe.As<Vector128<byte>, Guid>(ref shuffled);
@@ -613,7 +613,7 @@ namespace System // wa-o, System Namespace!?
                 // |D|C|B|A|...
                 //      ...|F|E|H|G|...
                 //              ...|I|J|K|L|M|N|O|P|
-                ref var ptr = ref Unsafe.As<Ulid, uint>(ref this);
+                ref var ptr = ref Unsafe.As<Ulid, uint>(ref Unsafe.AsRef(in this));
                 var lower = BinaryPrimitives.ReverseEndianness(ptr);
                 MemoryMarshal.Write(buf, ref lower);
 
@@ -626,7 +626,7 @@ namespace System // wa-o, System Namespace!?
             }
             else
             {
-                MemoryMarshal.Write(buf, ref this);
+                MemoryMarshal.Write(buf, ref Unsafe.AsRef(in this));
             }
 
             return MemoryMarshal.Read<Guid>(buf);
