@@ -234,6 +234,10 @@ public class UlidToBytesConverter : ValueConverter<Ulid, byte[]>
 {
     private static readonly ConverterMappingHints defaultHints = new ConverterMappingHints(size: 16);
 
+    public UlidToBytesConverter() : this(null)
+    {
+    }
+
     public UlidToBytesConverter(ConverterMappingHints mappingHints = null)
         : base(
                 convertToProviderExpression: x => x.ToByteArray(),
@@ -247,6 +251,10 @@ public class UlidToStringConverter : ValueConverter<Ulid, string>
 {
     private static readonly ConverterMappingHints defaultHints = new ConverterMappingHints(size: 26);
 
+    public UlidToStringConverter() : this(null)
+    {
+    }
+
     public UlidToStringConverter(ConverterMappingHints mappingHints = null)
         : base(
                 convertToProviderExpression: x => x.ToString(),
@@ -254,6 +262,29 @@ public class UlidToStringConverter : ValueConverter<Ulid, string>
                 mappingHints: defaultHints.With(mappingHints))
     {
     }
+}
+```
+
+To use those converters, you can either specify individual properties of entities in `OnModelCreating` method of your context:
+```csharp
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<MyEntity>()
+        .Property(e => e.MyProperty)
+        .HasConversion<UlidToStringConverter>()
+        .HasConversion<UlidToBytesConverter>();
+}
+```
+
+or use model bulk configuration for all properties of type `Ulid`. To do this, overload `ConfigureConventions` method of your context:
+
+```csharp
+protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+{
+    configurationBuilder
+        .Properties<Ulid>()
+        .HaveConversion<UlidToStringConverter>()
+        .HaveConversion<UlidToBytesConverter>();
 }
 ```
 
