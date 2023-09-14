@@ -190,6 +190,18 @@ namespace UlidTests
             }
         }
 #endif
+        
+        [Fact]
+        public void TryFormatUtf8Bytes()
+        {
+            var value = Ulid.NewUlid();
+            var utf8Value = System.Text.Encoding.UTF8.GetBytes(value.ToString());
 
+            var result = new byte[26];
+            value.TryFormat(result, out var bytesWritten, Array.Empty<char>(), null).Should().BeTrue();
+            bytesWritten.Should().Be(26);
+            result.Should().Equal(utf8Value);
+        }
     }
 }
+
