@@ -19,6 +19,7 @@ jobs:
           dotnet-version: |
             6.0.x
             7.0.x
+            8.0.x
       - run: dotnet build -c Debug
       - run: dotnet test -c Debug --no-build
       - run: dotnet test -c Debug --no-build  --environment "COMPlus_EnableHWIntrinsic=0;COMPlus_EnableSSE2=0"

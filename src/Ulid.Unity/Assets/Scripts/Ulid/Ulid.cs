@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 #if NET6_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
@@ -30,6 +31,9 @@ namespace System // wa-o, System Namespace!?
 #endif
 #if NET7_0_OR_GREATER
 , ISpanParsable<Ulid>
+#endif
+#if NET8_0_OR_GREATER
+, IUtf8SpanFormattable
 #endif
        
     {
@@ -483,7 +487,6 @@ namespace System // wa-o, System Namespace!?
 #endif
         }
 
-#if NET6_0_OR_GREATER
         //
         //ISpanFormattable
         //
@@ -502,9 +505,7 @@ namespace System // wa-o, System Namespace!?
         }
 
         public string ToString(string format, IFormatProvider formatProvider) => ToString();
-#endif
 
-#if NET7_0_OR_GREATER
         //
         // IParsable
         //
@@ -512,18 +513,36 @@ namespace System // wa-o, System Namespace!?
         public static Ulid Parse(string s, IFormatProvider provider) => Parse(s);
 
         /// <inheritdoc cref="IParsable{TSelf}.TryParse(string?, IFormatProvider?, out TSelf)" />
-        public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, out Ulid result) => TryParse(s, out result);
+        public static bool TryParse(
+#if NETSTANDARD2_1_OR_GREATER
+            [NotNullWhen(true)] string s,
+#else            
+            string s,
+#endif 
+            IFormatProvider provider, out Ulid result) => TryParse(s, out result);
 
         //
         // ISpanParsable
         //
-
         /// <inheritdoc cref="ISpanParsable{TSelf}.Parse(ReadOnlySpan{char}, IFormatProvider?)" />
         public static Ulid Parse(ReadOnlySpan<char> s, IFormatProvider provider) => Parse(s);
 
         /// <inheritdoc cref="ISpanParsable{TSelf}.TryParse(ReadOnlySpan{char}, IFormatProvider?, out TSelf)" />
         public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider provider, out Ulid result) => TryParse(s, out result);
-#endif
+
+        //
+        // IUtf8SpanFormattable
+        //
+        public bool TryFormat(Span<byte> destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider provider)
+        {
+            if (TryWriteStringify(destination))
+            {
+                bytesWritten = 26;
+                return true;
+            }
+            bytesWritten = 0;
+            return false;
+        }
 
         // Comparable/Equatable
 
