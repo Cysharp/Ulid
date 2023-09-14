@@ -97,34 +97,46 @@ namespace System // wa-o, System Namespace!?
                     var lower = Unsafe.As<byte, uint>(ref Unsafe.AsRef(this.timestamp0));
                     var upper = Unsafe.As<byte, ushort>(ref Unsafe.AsRef(this.timestamp4));
                     var time = (long)BinaryPrimitives.ReverseEndianness(upper) + (((long)BinaryPrimitives.ReverseEndianness(lower)) << 16);
-
                     return DateTimeOffset.FromUnixTimeMilliseconds(time);
                 }
+                else
+                {
+                    // |A|B|C|D|E|F|G|H|... -> |A|B|C|D|E|F|0|0|
 
-                Span<byte> buffer = stackalloc byte[8];
-                buffer[0] = timestamp5;
-                buffer[1] = timestamp4;
-                buffer[2] = timestamp3;
-                buffer[3] = timestamp2;
-                buffer[4] = timestamp1;
-                buffer[5] = timestamp0; // [6], [7] = 0
-
-                var timestampMilliseconds = Unsafe.As<byte, long>(ref MemoryMarshal.GetReference(buffer));
-                return DateTimeOffset.FromUnixTimeMilliseconds(timestampMilliseconds);
+                    // Upper |A|B|C|D|
+                    // Lower |E|F|
+                    // Time  |A|B|C|D| + |E|F|0|0|
+                    var upper = Unsafe.As<byte, uint>(ref Unsafe.AsRef(this.timestamp0));
+                    var lower = Unsafe.As<byte, ushort>(ref Unsafe.AsRef(this.timestamp4));
+                    var time = ((long)upper << 32) + ((long)lower << 16);
+                    return DateTimeOffset.FromUnixTimeMilliseconds(time);
+                }
             }
         }
 
         internal Ulid(long timestampMilliseconds, XorShift64 random)
             : this()
         {
-            // Get memory in stack and copy to ulid(Little->Big reverse order).
             ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            if (BitConverter.IsLittleEndian)
+            {
+                // Get memory in stack and copy to ulid(Little->Big reverse order).
+                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            }
+            else
+            {
+                this.timestamp0 = Unsafe.Add(ref firstByte, 0);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 5);
+            }
            
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
@@ -134,14 +146,26 @@ namespace System // wa-o, System Namespace!?
         internal Ulid(long timestampMilliseconds, ReadOnlySpan<byte> randomness)
             : this()
         {
-            // Get memory in stack and copy to ulid(Little->Big reverse order).
             ref var firstByte = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-            this.timestamp0 = Unsafe.Add(ref firstByte, 5);
-            this.timestamp1 = Unsafe.Add(ref firstByte, 4);
-            this.timestamp2 = Unsafe.Add(ref firstByte, 3);
-            this.timestamp3 = Unsafe.Add(ref firstByte, 2);
-            this.timestamp4 = Unsafe.Add(ref firstByte, 1);
-            this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            if (BitConverter.IsLittleEndian)
+            {
+                // Get memory in stack and copy to ulid(Little->Big reverse order).
+                this.timestamp0 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 0);
+            }
+            else
+            {
+                this.timestamp0 = Unsafe.Add(ref firstByte, 0);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 1);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 5);
+            }
 
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
             randomness0 = randomness[0];
