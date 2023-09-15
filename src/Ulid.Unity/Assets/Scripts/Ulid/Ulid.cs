@@ -134,12 +134,12 @@ namespace System // wa-o, System Namespace!?
             }
             else
             {
-                this.timestamp0 = Unsafe.Add(ref firstByte, 0);
-                this.timestamp1 = Unsafe.Add(ref firstByte, 1);
-                this.timestamp2 = Unsafe.Add(ref firstByte, 2);
-                this.timestamp3 = Unsafe.Add(ref firstByte, 3);
-                this.timestamp4 = Unsafe.Add(ref firstByte, 4);
-                this.timestamp5 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp0 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 6);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 7);
             }
            
             // Get first byte of randomness from Ulid Struct.
@@ -163,12 +163,12 @@ namespace System // wa-o, System Namespace!?
             }
             else
             {
-                this.timestamp0 = Unsafe.Add(ref firstByte, 0);
-                this.timestamp1 = Unsafe.Add(ref firstByte, 1);
-                this.timestamp2 = Unsafe.Add(ref firstByte, 2);
-                this.timestamp3 = Unsafe.Add(ref firstByte, 3);
-                this.timestamp4 = Unsafe.Add(ref firstByte, 4);
-                this.timestamp5 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp0 = Unsafe.Add(ref firstByte, 2);
+                this.timestamp1 = Unsafe.Add(ref firstByte, 3);
+                this.timestamp2 = Unsafe.Add(ref firstByte, 4);
+                this.timestamp3 = Unsafe.Add(ref firstByte, 5);
+                this.timestamp4 = Unsafe.Add(ref firstByte, 6);
+                this.timestamp5 = Unsafe.Add(ref firstByte, 7);
             }
 
             ref var src = ref MemoryMarshal.GetReference(randomness); // length = 10
