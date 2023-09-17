@@ -35,7 +35,7 @@ namespace System // wa-o, System Namespace!?
 #if NET8_0_OR_GREATER
 , IUtf8SpanFormattable
 #endif
-       
+
     {
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
@@ -105,14 +105,14 @@ namespace System // wa-o, System Namespace!?
                 }
                 else
                 {
-                    // |A|B|C|D|E|F|G|H|... -> |A|B|C|D|E|F|0|0|
+                    // |A|B|C|D|E|F|G|H|... -> |0|0|A|B|C|D|E|F|
 
                     // Upper |A|B|C|D|
                     // Lower |E|F|
-                    // Time  |A|B|C|D| + |E|F|0|0|
+                    // Time  |0|0|A|B|C|D| + |E|F|
                     var upper = Unsafe.As<byte, uint>(ref Unsafe.AsRef(this.timestamp0));
                     var lower = Unsafe.As<byte, ushort>(ref Unsafe.AsRef(this.timestamp4));
-                    var time = ((long)upper << 32) + ((long)lower << 16);
+                    var time = ((long)upper << 16) + lower;
                     return DateTimeOffset.FromUnixTimeMilliseconds(time);
                 }
             }
@@ -141,7 +141,7 @@ namespace System // wa-o, System Namespace!?
                 this.timestamp4 = Unsafe.Add(ref firstByte, 6);
                 this.timestamp5 = Unsafe.Add(ref firstByte, 7);
             }
-           
+
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
             Unsafe.WriteUnaligned(ref randomness2, random.Next()); // randomness2~9
@@ -516,9 +516,9 @@ namespace System // wa-o, System Namespace!?
         public static bool TryParse(
 #if NETSTANDARD2_1_OR_GREATER
             [NotNullWhen(true)] string s,
-#else            
+#else
             string s,
-#endif 
+#endif
             IFormatProvider provider, out Ulid result) => TryParse(s, out result);
 
         //
@@ -676,15 +676,15 @@ namespace System // wa-o, System Namespace!?
         }
 
 #if NET6_0_OR_GREATER
-        private static bool IsVector128Supported 
+        private static bool IsVector128Supported
         {
-            get 
+            get
             {
 #if NET7_0_OR_GREATER
                 return Vector128.IsHardwareAccelerated;
 #endif
                 return Sse3.IsSupported;
-            } 
+            }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Vector128<byte> Shuffle(Vector128<byte> value, Vector128<byte> mask)
