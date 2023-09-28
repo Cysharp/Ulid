@@ -93,7 +93,7 @@ namespace System // wa-o, System Namespace!?
             {
                 if (BitConverter.IsLittleEndian)
                 {
-                    // |A|B|C|D|E|F|G|H|... -> |F|E|D|C|B|A|0|0|
+                    // |A|B|C|D|E|F|... -> |F|E|D|C|B|A|0|0|
 
                     // Lower |A|B|C|D| -> |D|C|B|A|
                     // Upper |E|F| -> |F|E|
@@ -105,14 +105,14 @@ namespace System // wa-o, System Namespace!?
                 }
                 else
                 {
-                    // |A|B|C|D|E|F|G|H|... -> |A|B|C|D|E|F|0|0|
+                    // |A|B|C|D|E|F|... -> |0|0|A|B|C|D|E|F|
 
                     // Upper |A|B|C|D|
                     // Lower |E|F|
-                    // Time  |A|B|C|D| + |E|F|0|0|
+                    // Time  |A|B|C|C|0|0| + |E|F|
                     var upper = Unsafe.As<byte, uint>(ref Unsafe.AsRef(this.timestamp0));
                     var lower = Unsafe.As<byte, ushort>(ref Unsafe.AsRef(this.timestamp4));
-                    var time = ((long)upper << 32) + ((long)lower << 16);
+                    var time = ((long)upper << 16) + (long)lower;
                     return DateTimeOffset.FromUnixTimeMilliseconds(time);
                 }
             }
