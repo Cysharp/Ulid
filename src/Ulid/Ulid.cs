@@ -278,6 +278,10 @@ namespace System // wa-o, System Namespace!?
         public static Ulid Parse(ReadOnlySpan<char> base32)
         {
             if (base32.Length != 26) throw new ArgumentException("invalid base32 length, length:" + base32.Length);
+            for (int i = 0; i < base32.Length; i++)
+            {
+                if (CharToBase32[base32[i]] == 255) throw new ArgumentException("invalid base32 character, character:" + base32[i]);
+            }
             return new Ulid(base32);
         }
 
@@ -299,7 +303,14 @@ namespace System // wa-o, System Namespace!?
                 ulid = default(Ulid);
                 return false;
             }
-
+            for (int i = 0; i < base32.Length; i++)
+            {
+                if (CharToBase32[base32[i]] == 255)
+                {
+                    ulid = default(Ulid);
+                    return false;
+                }
+            }
             try
             {
                 ulid = new Ulid(base32);

@@ -123,6 +123,7 @@ namespace UlidTests
         {
             Assert.Throws<ArgumentException>(() => Ulid.Parse("1234"));
             Assert.Throws<ArgumentException>(() => Ulid.Parse(Guid.NewGuid().ToString()));
+            Assert.Throws<ArgumentException>(() => Ulid.Parse("01HV0CXYMHVZD8AETQVAYVDT0U"));
         }
 
         [Fact]
@@ -130,6 +131,7 @@ namespace UlidTests
         {
             Assert.False(Ulid.TryParse("1234", out _));
             Assert.False(Ulid.TryParse(Guid.NewGuid().ToString(), out _));
+            Assert.False(Ulid.TryParse("01HV0CXYMHVZD8AETQVAYVDT0U", out _));
         }
 
 #if NET6_0_OR_GREATER
