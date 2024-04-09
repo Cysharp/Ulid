@@ -134,6 +134,12 @@ namespace UlidTests
             Assert.False(Ulid.TryParse("01HV0CXYMHVZD8AETQVAYVDT0U", out _));
         }
 
+        [Fact]
+        public void CrockfordBase32DecodingMapsILO()
+        {
+            Ulid.Parse("01HV0CXYMHVZD8AETQVAILOilo").Should().Be(Ulid.Parse("01HV0CXYMHVZD8AETQVA110110"));
+        }
+
 #if NET6_0_OR_GREATER
         [Fact]
         public void UlidTryFormatReturnsStringAndLength()
