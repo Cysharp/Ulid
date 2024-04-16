@@ -14,6 +14,11 @@ namespace UlidTests
         {
             public Ulid value { get; set; }
         }
+        
+        class TestDictionarySerializationClass
+        {
+            public Dictionary<Ulid, int> value { get; set; }
+        }
 
         JsonSerializerOptions GetOptions()
         {
@@ -80,6 +85,19 @@ namespace UlidTests
 
             var serialized = JsonSerializer.Serialize(groundTruth);
             var deserialized = JsonSerializer.Deserialize<TestSerializationClass>(serialized);
+            deserialized.value.Should().BeEquivalentTo(groundTruth.value, "JSON serialize roundtrip");
+        }
+        
+        [Fact]
+        public void SerializeWithPropertyNameTest()
+        {
+            var groundTruth = new TestDictionarySerializationClass()
+            {
+                value = new Dictionary<Ulid, int>() { { Ulid.NewUlid(), 1 } }
+            };
+
+            var serialized = JsonSerializer.Serialize(groundTruth, GetOptions());
+            var deserialized = JsonSerializer.Deserialize<TestDictionarySerializationClass>(serialized, GetOptions());
             deserialized.value.Should().BeEquivalentTo(groundTruth.value, "JSON serialize roundtrip");
         }
     }

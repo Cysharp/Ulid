@@ -16,7 +16,8 @@ namespace Cysharp.Serialization.Json
         {
             try
             {
-                if (reader.TokenType != JsonTokenType.String) throw new JsonException("Expected string");
+                if (reader.TokenType != JsonTokenType.String && reader.TokenType != JsonTokenType.PropertyName)
+                    throw new JsonException("Expected string or property name");
 
                 if (reader.HasValueSequence)
                 {
@@ -52,6 +53,19 @@ namespace Cysharp.Serialization.Json
             Span<byte> buf = stackalloc byte[26];
             value.TryWriteStringify(buf);
             writer.WriteStringValue(buf);
+        }
+
+        public override void WriteAsPropertyName(Utf8JsonWriter writer, Ulid value, JsonSerializerOptions options)
+        {
+            Span<byte> buf = stackalloc byte[26];
+            value.TryWriteStringify(buf);
+            writer.WritePropertyName(buf);
+        }
+
+        public override Ulid ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert,
+            JsonSerializerOptions options)
+        {
+            return Read(ref reader, typeToConvert, options);
         }
     }
 }
