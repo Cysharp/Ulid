@@ -58,7 +58,8 @@ jobs:
           directory: src/Ulid.Unity
 
       # Store artifacts.
-      - uses: actions/upload-artifact@v2
+      - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: Ulid.Unity.${{ matrix.unity }}.unitypackage.zip
           path: ./src/Ulid.Unity/*.unitypackage
+          retention-days: 1
