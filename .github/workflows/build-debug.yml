@@ -62,3 +62,4 @@ jobs:
         with:
           name: Ulid.Unity.${{ matrix.unity }}.unitypackage.zip
           path: ./src/Ulid.Unity/*.unitypackage
+          retention-days: 1
