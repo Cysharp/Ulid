@@ -612,6 +612,16 @@ namespace System // wa-o, System Namespace!?
             return 0;
         }
 
+        /// <summary>
+        /// Determines whether a string is a valid representation of a ULID
+        /// </summary>
+        /// <param name="base32">The string representation of the ULID to validate.</param>
+        /// <returns>True if the ULID is valid; otherwise, false.</returns>
+        public static bool IsValid(string base32)
+        {
+            return TryParse(base32.AsSpan(), out _);
+        }
+
         public int CompareTo(object value)
         {
             if (value == null)

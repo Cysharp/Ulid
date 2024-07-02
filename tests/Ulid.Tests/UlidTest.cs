@@ -202,6 +202,22 @@ namespace UlidTests
             bytesWritten.Should().Be(26);
             result.Should().Equal(utf8Value);
         }
+
+        [Fact]
+        public void IsValidReturnsFalseWhenInvalidStringRepresentation()
+        {
+            string str = "test";
+
+            Assert.False(Ulid.IsValid(str));
+        }
+
+        [Fact]
+        public void IsValidReturnsTrueWhenValidStringRepresentation()
+        {
+            var value = Ulid.NewUlid();
+
+            Assert.True(Ulid.IsValid(value.ToString()));
+        }
     }
 }
 
