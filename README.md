@@ -42,8 +42,8 @@ Similar api to Guid.
 
 Allow to convert Guid.
 
-* .ToGuid()
-* (Guid)ulid
+* `.ToGuid()`
+* `(Guid)ulid`
 
 Performance
 ---
