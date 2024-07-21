@@ -40,6 +40,11 @@ Similar api to Guid.
 * `.Time`
 * `.Random`
 
+Allow to convert Guid.
+
+* .ToGuid()
+* (Guid)ulid
+
 Performance
 ---
 `Guid` is standard corelib guid. `Ulid` is this library. `NUlid` is competitor [RobThree/NUlid](https://github.com/RobThree/NUlid).
