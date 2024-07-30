@@ -41,7 +41,7 @@ namespace System // wa-o, System Namespace!?
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
         static readonly byte[] Base32Bytes = Encoding.UTF8.GetBytes(Base32Text);
-        static readonly byte[] CharToBase32 = new byte[] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 255, 18, 19, 255, 20, 21, 255, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31 };
+        static readonly byte[] CharToBase32 = new byte[] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 1, 18, 19, 1, 20, 21, 0, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 1, 18, 19, 1, 20, 21, 0, 22, 23, 24, 25, 26, 255, 27, 28, 29, 30, 31 };
         static readonly DateTimeOffset UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static readonly Ulid MinValue = new Ulid(UnixEpoch.ToUnixTimeMilliseconds(), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
@@ -289,6 +289,10 @@ namespace System // wa-o, System Namespace!?
         public static Ulid Parse(ReadOnlySpan<char> base32)
         {
             if (base32.Length != 26) throw new ArgumentException("invalid base32 length, length:" + base32.Length);
+            for (int i = 0; i < base32.Length; i++)
+            {
+                if (CharToBase32[base32[i]] == 255) throw new ArgumentException("invalid base32 character, character:" + base32[i]);
+            }
             return new Ulid(base32);
         }
 
@@ -310,7 +314,14 @@ namespace System // wa-o, System Namespace!?
                 ulid = default(Ulid);
                 return false;
             }
-
+            for (int i = 0; i < base32.Length; i++)
+            {
+                if (CharToBase32[base32[i]] == 255)
+                {
+                    ulid = default(Ulid);
+                    return false;
+                }
+            }
             try
             {
                 ulid = new Ulid(base32);
