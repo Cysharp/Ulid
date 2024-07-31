@@ -125,10 +125,6 @@ namespace System // wa-o, System Namespace!?
             unsafe
             {
                 ref var firstByte = ref Unsafe.AsRef<byte>(Unsafe.AsPointer(ref timestampMilliseconds));
-
-
-                ref var firstByteOriginal = ref Unsafe.As<long, byte>(ref timestampMilliseconds);
-
                 if (BitConverter.IsLittleEndian)
                 {
                     // Get memory in stack and copy to ulid(Little->Big reverse order).
