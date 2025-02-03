@@ -237,11 +237,7 @@ to use in EF, create ValueConverter and bind it.
 ```csharp
 public class UlidToBytesConverter : ValueConverter<Ulid, byte[]>
 {
-    private static readonly ConverterMappingHints defaultHints = new ConverterMappingHints(size: 16);
-
-    public UlidToBytesConverter() : this(null)
-    {
-    }
+    private static readonly ConverterMappingHints DefaultHints = new ConverterMappingHints(size: 16);
 
     public UlidToBytesConverter(ConverterMappingHints mappingHints = null)
         : base(
@@ -254,11 +250,7 @@ public class UlidToBytesConverter : ValueConverter<Ulid, byte[]>
 
 public class UlidToStringConverter : ValueConverter<Ulid, string>
 {
-    private static readonly ConverterMappingHints defaultHints = new ConverterMappingHints(size: 26);
-
-    public UlidToStringConverter() : this(null)
-    {
-    }
+    private static readonly ConverterMappingHints DefaultHints = new ConverterMappingHints(size: 26);
 
     public UlidToStringConverter(ConverterMappingHints mappingHints = null)
         : base(
