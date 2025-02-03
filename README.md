@@ -247,7 +247,7 @@ public class UlidToBytesConverter : ValueConverter<Ulid, byte[]>
         : base(
                 convertToProviderExpression: x => x.ToByteArray(),
                 convertFromProviderExpression: x => new Ulid(x),
-                mappingHints: defaultHints.With(mappingHints))
+                mappingHints: DefaultHints.With(mappingHints))
     {
     }
 }
@@ -264,7 +264,7 @@ public class UlidToStringConverter : ValueConverter<Ulid, string>
         : base(
                 convertToProviderExpression: x => x.ToString(),
                 convertFromProviderExpression: x => Ulid.Parse(x),
-                mappingHints: defaultHints.With(mappingHints))
+                mappingHints: DefaultHints.With(mappingHints))
     {
     }
 }
