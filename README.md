@@ -237,34 +237,34 @@ to use in EF, create ValueConverter and bind it.
 ```csharp
 public class UlidToBytesConverter : ValueConverter<Ulid, byte[]>
 {
-    private static readonly ConverterMappingHints defaultHints = new ConverterMappingHints(size: 16);
+    private static readonly ConverterMappingHints DefaultHints = new ConverterMappingHints(size: 16);
 
     public UlidToBytesConverter() : this(null)
     {
     }
-
-    public UlidToBytesConverter(ConverterMappingHints mappingHints = null)
+    
+    public UlidToBytesConverter(ConverterMappingHints? mappingHints)
         : base(
                 convertToProviderExpression: x => x.ToByteArray(),
                 convertFromProviderExpression: x => new Ulid(x),
-                mappingHints: defaultHints.With(mappingHints))
+                mappingHints: DefaultHints.With(mappingHints))
     {
     }
 }
 
 public class UlidToStringConverter : ValueConverter<Ulid, string>
 {
-    private static readonly ConverterMappingHints defaultHints = new ConverterMappingHints(size: 26);
+    private static readonly ConverterMappingHints DefaultHints = new ConverterMappingHints(size: 26);
 
     public UlidToStringConverter() : this(null)
     {
     }
 
-    public UlidToStringConverter(ConverterMappingHints mappingHints = null)
+    public UlidToStringConverter(ConverterMappingHints? mappingHints)
         : base(
                 convertToProviderExpression: x => x.ToString(),
                 convertFromProviderExpression: x => Ulid.Parse(x),
-                mappingHints: defaultHints.With(mappingHints))
+                mappingHints: DefaultHints.With(mappingHints))
     {
     }
 }
