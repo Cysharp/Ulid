@@ -10,10 +10,15 @@
     <Authors>Cysharp</Authors>
     <Copyright>© Cysharp, Inc.</Copyright>
     <PackageProjectUrl>https://github.com/Cysharp/Ulid</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>guid</PackageTags>
     <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>
