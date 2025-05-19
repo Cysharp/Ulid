@@ -17,6 +17,8 @@
         <PackAsTool>true</PackAsTool>
         <LangVersion>7.3</LangVersion>
         <IsPackable>true</IsPackable>
+        <!-- Allow running on whatever latest version users have. See https://docs.microsoft.com/en-us/dotnet/core/versions/selection#framework-dependent-apps-roll-forward -->
+        <RollForward>LatestMajor</RollForward>
     </PropertyGroup>
 
     <ItemGroup>
