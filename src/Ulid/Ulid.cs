@@ -36,7 +36,7 @@ namespace System // wa-o, System Namespace!?
 #if NET8_0_OR_GREATER
 , IUtf8SpanFormattable
 #endif
-       
+
     {
         // https://en.wikipedia.org/wiki/Base32
         static readonly char[] Base32Text = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".ToCharArray();
@@ -145,7 +145,7 @@ namespace System // wa-o, System Namespace!?
                     this.timestamp5 = Unsafe.Add(ref firstByte, 7);
                 }
             }
-           
+
             // Get first byte of randomness from Ulid Struct.
             Unsafe.WriteUnaligned(ref randomness0, random.Next()); // randomness0~7(but use 0~1 only)
             Unsafe.WriteUnaligned(ref randomness2, random.Next()); // randomness2~9
@@ -393,7 +393,7 @@ namespace System // wa-o, System Namespace!?
             try
             {
                 TryWriteBytes(buffer);
-                return Convert.ToBase64String(buffer, options);
+                return Convert.ToBase64String(buffer, 0, 16, options);
             }
             finally
             {
@@ -523,9 +523,9 @@ namespace System // wa-o, System Namespace!?
         public static bool TryParse(
 #if NETSTANDARD2_1_OR_GREATER
             [NotNullWhen(true)] string s,
-#else            
+#else
             string s,
-#endif 
+#endif
             IFormatProvider provider, out Ulid result) => TryParse(s, out result);
 
         //
@@ -683,15 +683,15 @@ namespace System // wa-o, System Namespace!?
         }
 
 #if NET6_0_OR_GREATER
-        private static bool IsVector128Supported 
+        private static bool IsVector128Supported
         {
-            get 
+            get
             {
 #if NET7_0_OR_GREATER
                 return Vector128.IsHardwareAccelerated;
 #endif
                 return Sse3.IsSupported;
-            } 
+            }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Vector128<byte> Shuffle(Vector128<byte> value, Vector128<byte> mask)
@@ -712,5 +712,5 @@ namespace System // wa-o, System Namespace!?
             throw new NotImplementedException();
         }
 #endif
-            }
+    }
 }
