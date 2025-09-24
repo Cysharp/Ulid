@@ -1,27 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>release.snk</AssemblyOriginatorKeyFile>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-        <!-- NuGet -->
-        <PackageId>Ulid.MessagePack</PackageId>
-        <Description>Ulid MessagePack Formatter.</Description>
-        <IsPackable>true</IsPackable>
-    </PropertyGroup>
+    <!-- NuGet -->
+    <IsPackable>true</IsPackable>
+    <PackageId>Ulid.MessagePack</PackageId>
+    <Description>Ulid MessagePack Formatter.</Description>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="MessagePack" Version="2.1.90" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.1.90" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Ulid\Ulid.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="..\Ulid\Icon.png" Pack="true" PackagePath="/" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ulid\Ulid.csproj" />
+  </ItemGroup>
 
 </Project>

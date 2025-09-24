@@ -1,32 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-        <DefineConstants>SYSTEM_TEXT_JSON</DefineConstants>
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>release.snk</AssemblyOriginatorKeyFile>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <DefineConstants>SYSTEM_TEXT_JSON</DefineConstants>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-        <!-- NuGet -->
-        <PackageId>Ulid.SystemTextJson</PackageId>
-        <Description>Ulid System.Text.Json Converter.</Description>
-        <IsPackable>true</IsPackable>
-    </PropertyGroup>
+    <!-- NuGet -->
+    <IsPackable>true</IsPackable>
+    <PackageId>Ulid.SystemTextJson</PackageId>
+    <Description>Ulid System.Text.Json Converter.</Description>
+  </PropertyGroup>
 
-    <ItemGroup>
-                <Compile Include="..\Ulid\UlidJsonConverter.cs" Link="UlidJsonConverter.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Ulid\UlidJsonConverter.cs" Link="UlidJsonConverter.cs" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="System.Text.Json" Version="8.0.4" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Ulid\Ulid.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="..\Ulid\Icon.png" Pack="true" PackagePath="/" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ulid\Ulid.csproj" />
+  </ItemGroup>
 
 </Project>

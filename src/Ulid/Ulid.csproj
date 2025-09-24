@@ -1,41 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <RootNamespace>System</RootNamespace>
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>release.snk</AssemblyOriginatorKeyFile>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<LangVersion>Latest</LangVersion>
-		
-        <!-- NuGet -->
-        <PackageId>Ulid</PackageId>
-        <Description>Fast .NET Standard(C#) Implementation of ULID.</Description>
-        <IsPackable>true</IsPackable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>System</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <LangVersion>Latest</LangVersion>
 
-    <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-        <PackageReference Include="System.Memory" Version="4.5.2" />
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
-    </ItemGroup>
+    <!-- NuGet -->
+    <IsPackable>true</IsPackable>
+    <PackageId>Ulid</PackageId>
+    <Description>Fast .NET Standard(C#) Implementation of ULID.</Description>
+  </PropertyGroup>
 
-    <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
-    </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Memory" Version="4.5.2" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <None Include="Icon.png" Pack="true" PackagePath="/" />
-    </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+  </ItemGroup>
 
-    <!-- Copy files for Unity -->
-    <PropertyGroup>
-        <DestinationRoot>$(MSBuildProjectDirectory)\..\Ulid.Unity\Assets\Scripts\Ulid\</DestinationRoot>
-    </PropertyGroup>
-    <ItemGroup>
-        <TargetFiles1 Include="$(MSBuildProjectDirectory)\**\*.cs" Exclude="**\bin\**\*.*;**\obj\**\*.*;UlidJsonConverter.cs" />
-    </ItemGroup>
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Copy SourceFiles="@(TargetFiles1)" DestinationFiles="$(DestinationRoot)\%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
-    </Target>
+  <!-- Copy files for Unity -->
+  <PropertyGroup>
+    <DestinationRoot>$(MSBuildProjectDirectory)\..\Ulid.Unity\Assets\Scripts\Ulid\</DestinationRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <TargetFiles1 Include="$(MSBuildProjectDirectory)\**\*.cs" Exclude="**\bin\**\*.*;**\obj\**\*.*;UlidJsonConverter.cs" />
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="@(TargetFiles1)" DestinationFiles="$(DestinationRoot)\%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>
