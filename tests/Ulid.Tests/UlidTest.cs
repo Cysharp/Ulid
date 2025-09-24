@@ -149,7 +149,7 @@ namespace UlidTests
             largeDestination.AsSpan().Slice(0,26).ToArray().Should().BeEquivalentTo(asString);
             largeLength.Should().Be(26);
         }
-        
+
         [Fact]
         public void UlidTryFormatReturnsFalseWhenInvalidDestination()
         {
@@ -190,7 +190,7 @@ namespace UlidTests
             }
         }
 #endif
-        
+
         [Fact]
         public void TryFormatUtf8Bytes()
         {
@@ -204,4 +204,3 @@ namespace UlidTests
         }
     }
 }
-

@@ -8,7 +8,7 @@ namespace UlidTests
     {
         private readonly TypeConverter _ulidConverter = TypeDescriptor.GetConverter(typeof(Ulid));
         private readonly Ulid _testUlid = Ulid.NewUlid();
-        
+
         [Fact]
         public void UlidCanConvertFromString()
         {
