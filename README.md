@@ -2,7 +2,7 @@ Ulid
 ===
 [![GitHub Actions](https://github.com/Cysharp/Ulid/workflows/Build-Debug/badge.svg)](https://github.com/Cysharp/Ulid/actions) [![Releases](https://img.shields.io/github/release/Cysharp/Ulid.svg)](https://github.com/Cysharp/Ulid/releases)
 
-Fast C# Implementation of [ULID](https://github.com/ulid/spec) for .NET Core and Unity. Ulid is sortable, random id generator. This project aims performance by fastest binary serializer([MessagePack-CSharp](https://github.com/neuecc/MessagePack-CSharp/)) technology. It achives faster generate than Guid.NewGuid.
+Fast C# Implementation of [ULID](https://github.com/ulid/spec) for .NET Core and Unity. Ulid is sortable, random id generator. This project focuses on performance, using the fastest binary serializer([MessagePack-CSharp](https://github.com/neuecc/MessagePack-CSharp/)) technology. It achieves faster generation than Guid.NewGuid.
 
 ![image](https://user-images.githubusercontent.com/46207/55129636-266c0d00-515b-11e9-85ab-3437de539451.png)
 
@@ -40,7 +40,7 @@ Similar api to Guid.
 * `.Time`
 * `.Random`
 
-Allow to convert Guid.
+Allows conversion to Guid.
 
 * `.ToGuid()`
 * `(Guid)ulid`
@@ -87,7 +87,7 @@ to string representation(Base32), `Ulid.ToString()` is fastest and less allocati
 |  Ulid_ | 110.2 ns |    NA |  0.54 |      0.0125 |           - |           - |                80 B |
 | NUlid_ | 301.7 ns |    NA |  1.47 |      0.0744 |           - |           - |               472 B |
 
-case of get the string representation immediately, `Ulid` is twice faster than Guid.
+In case of get the string representation immediately, `Ulid` is twice faster than Guid.
 
 * GetHashCode
 
@@ -97,7 +97,7 @@ case of get the string representation immediately, `Ulid` is twice faster than G
 |  Ulid_ |  1.0329 ns |    NA |  1.06 |           - |           - |           - |                   - |
 | NUlid_ | 20.6175 ns |    NA | 21.24 |      0.0063 |           - |           - |                40 B |
 
-GetHashCode is called when use dictionary's key. `Ulid` is fast and zero allocation.
+GetHashCode is called when using dictionary's key. `Ulid` is fast and zero allocation.
 
 * Equals
 
@@ -107,7 +107,7 @@ GetHashCode is called when use dictionary's key. `Ulid` is fast and zero allocat
 |  Ulid_ |  2.023 ns |    NA |  1.11 |           - |           - |           - |                   - |
 | NUlid_ | 29.875 ns |    NA | 16.43 |      0.0126 |           - |           - |                80 B |
 
-Equals is called when use dictionary's key. `Ulid` is fast and zero allocation.
+Equals is called when using dictionary's key. `Ulid` is fast and zero allocation.
 
 * CompareTo
 
@@ -117,7 +117,7 @@ Equals is called when use dictionary's key. `Ulid` is fast and zero allocation.
 |  Ulid_ |  3.838 ns |    NA |  0.71 |           - |           - |           - |                   - |
 | NUlid_ | 17.126 ns |    NA |  3.17 |      0.0063 |           - |           - |                40 B |
 
-CompareTo is called when use sort. `Ulid` is fastest and zero allocation.
+CompareTo is called when sorting. `Ulid` is fastest and zero allocation.
 
 Cli
 ---
@@ -125,7 +125,7 @@ You can install command-line to generate ulid string by  .NET Core Global Tool.
 
 `dotnet tool install --global ulid-cli`
 
-after installed, you can call like here.
+after installation, you can call it like this.
 
 ```
 $ dotnet ulid
@@ -142,7 +142,7 @@ AWmwNy2A/////////////w==
 ```
 
 ```
-argument list:
+Arguments:
 -t, -timestamp: [default=null]timestamp(converted to UTC, ISO8601 format recommended)
 -r, -randomness: [default=null]randomness bytes(formatted as Base32, must be 16 characters, case insensitive)
 -b, -base64: [default=False]output as base64 format, or output base32 if false
@@ -172,7 +172,7 @@ var options = new JsonSerializerOptions()
 JsonSerializer.Serialize(Ulid.NewUlid(), options);
 ```
 
-If application targetframework is `netcoreapp3.0`, converter is builtin, does not require to add `Ulid.SystemTextJson` package, and does not require use custom options.
+If the application target framework is `netcoreapp3.0`, converter is built-in, does not require to add `Ulid.SystemTextJson` package, and does not require custom options.
 
 **MessagePack-CSharp**
 
@@ -232,7 +232,7 @@ Dapper.SqlMapper.AddTypeHandler(new BinaryUlidHandler());
 
 **Entity Framework Core**
 
-to use in EF, create ValueConverter and bind it.
+To use it in EF, create a ValueConverter and bind it.
 
 ```csharp
 public class UlidToBytesConverter : ValueConverter<Ulid, byte[]>
