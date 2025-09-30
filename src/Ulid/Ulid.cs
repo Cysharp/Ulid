@@ -389,6 +389,11 @@ namespace System // wa-o, System Namespace!?
 
         public string ToBase64(Base64FormattingOptions options = Base64FormattingOptions.None)
         {
+            #if NETSTANDARD2_1_OR_GREATER || NET6_0_OR_GREATER
+            Span<byte> buffer = stackalloc byte[16];
+            TryWriteBytes(buffer);
+            return Convert.ToBase64String(buffer, options);
+            #else
             var buffer = ArrayPool<byte>.Shared.Rent(16);
             try
             {
@@ -399,6 +404,7 @@ namespace System // wa-o, System Namespace!?
             {
                 ArrayPool<byte>.Shared.Return(buffer);
             }
+            #endif
         }
 
         public bool TryWriteStringify(Span<byte> span)
