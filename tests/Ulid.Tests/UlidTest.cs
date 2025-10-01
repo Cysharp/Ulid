@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using FluentAssertions;
 using Xunit;
@@ -102,6 +102,31 @@ namespace UlidTests
             largeUlid.CompareTo(null).Should().Be(1);
             largeUlid.Invoking(u=> u.CompareTo("")).Should().Throw<ArgumentException>();
         }
+
+        [Fact]
+        public void UlidOperatorCompareTo()
+        {
+            var largeUlid = Ulid.MaxValue;
+            var smallUlid = Ulid.MinValue;
+
+            (largeUlid > smallUlid).Should().BeTrue();
+            (smallUlid > smallUlid).Should().BeFalse();
+
+            (smallUlid < largeUlid).Should().BeTrue();
+            (largeUlid < largeUlid).Should().BeFalse();
+
+            (smallUlid >= smallUlid).Should().BeTrue();
+            (smallUlid >= largeUlid).Should().BeFalse();
+            (largeUlid >= smallUlid).Should().BeTrue();
+
+            (smallUlid <= smallUlid).Should().BeTrue();
+            (largeUlid <= smallUlid).Should().BeFalse();
+            (smallUlid <= largeUlid).Should().BeTrue();
+
+            (smallUlid == smallUlid).Should().BeTrue();
+            (smallUlid != largeUlid).Should().BeTrue();
+        }
+
 
         [Fact]
         public void GuidComparison()
