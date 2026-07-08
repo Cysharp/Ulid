@@ -582,7 +582,10 @@ namespace System // wa-o, System Namespace!?
             ref var rB = ref Unsafe.As<Ulid, long>(ref Unsafe.AsRef(in right));
 
             // Compare each element
-            return rA == rB && Unsafe.Add(ref rA, 1) == Unsafe.Add(ref rB, 1);
+            var xorA = rA ^ rB;
+            var xorB = Unsafe.Add(ref rA, 1) ^ Unsafe.Add(ref rB, 1);
+
+            return (xorA | xorB) == 0;
         }
 
         public bool Equals(Ulid other) => EqualsCore(this, other);
