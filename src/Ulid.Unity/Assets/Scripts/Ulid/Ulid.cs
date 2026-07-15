@@ -593,6 +593,30 @@ namespace System // wa-o, System Namespace!?
 
         public static bool operator !=(Ulid a, Ulid b) => !EqualsCore(a, b);
 
+        public static bool operator >(Ulid left, Ulid right)
+        {
+            var result = left.CompareTo(right);
+            return (result == 1);
+        }
+
+        public static bool operator >= (Ulid left, Ulid right)
+        {
+            var result = left.CompareTo(right);
+            return (result >= 0);
+        }
+
+        public static bool operator <(Ulid left, Ulid right)
+        {
+            var result = left.CompareTo(right);
+            return (result == -1);
+        }
+
+        public static bool operator <= (Ulid left, Ulid right)
+        {
+            var result = left.CompareTo(right);
+            return (result <= 0);
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetResult(byte me, byte them) => me < them ? -1 : 1;
 
