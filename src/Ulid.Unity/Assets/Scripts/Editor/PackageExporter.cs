@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+
+using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -28,7 +30,7 @@ public static class PackageExporter
             exportPath,
             ExportPackageOptions.Default);
 
-        UnityEngine.Debug.Log("Export complete: " + Path.GetFullPath(exportPath));
+        UnityEngine.Debug.Log("Build succeeded! Export complete: " + Path.GetFullPath(exportPath));
     }
 
     static string GetVersion(string root)
@@ -67,3 +69,5 @@ public static class PackageExporter
         public string version;
     }
 }
+
+#endif
