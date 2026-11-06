@@ -18,6 +18,15 @@ namespace Cysharp.Serialization.Json
     		{
     			if (reader.TokenType != JsonTokenType.String && reader.TokenType != JsonTokenType.PropertyName) throw new JsonException("Expected string");
     
+                if (reader.HasValueSequence
+                    ? reader.ValueSequence.PositionOf((byte)'\\').HasValue
+                    : reader.ValueSpan.IndexOf((byte)'\\') >= 0)
+                {
+                    var text = reader.GetString();
+                    if (text.Length != 26) throw new JsonException("Ulid invalid: length must be 26");
+                    return Ulid.Parse(text);
+                }
+
     			if (reader.HasValueSequence)
     			{
     				// Parse using ValueSequence
