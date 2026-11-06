@@ -690,7 +690,7 @@ namespace System // wa-o, System Namespace!?
 #if NET7_0_OR_GREATER
                 return Vector128.IsHardwareAccelerated;
 #endif
-                return Sse3.IsSupported;
+                return Ssse3.IsSupported;
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
