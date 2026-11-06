@@ -1,3 +1,6 @@
+> [!NOTE]
+> .NET 9 has [UUID v7 Support](https://learn.microsoft.com/en-us/dotnet/api/system.guid.createversion7/). If you are using .NET 9 or later, we recommend using it instead.
+
 Ulid
 ===
 [![GitHub Actions](https://github.com/Cysharp/Ulid/workflows/Build-Debug/badge.svg)](https://github.com/Cysharp/Ulid/actions) [![Releases](https://img.shields.io/github/release/Cysharp/Ulid.svg)](https://github.com/Cysharp/Ulid/releases)
